@@ -1,9 +1,15 @@
 import waves2 from '@/assets/images/waves-test.svg';
 import { useState, useEffect } from 'react';
 
+// Define the type for an individual asset
+interface Asset {
+  denom: string;
+  amount: string;
+}
+
 export const SwapSection = () => {
   const [sendAddress, setSendAddress] = useState('');
-  const [assets, setAssets] = useState([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
   const [noteAmount, setNoteAmount] = useState('');
 
@@ -29,11 +35,11 @@ export const SwapSection = () => {
     setNoteAmount(event.target.value);
   };
 
-  const calculateReceiveAmount = () => {
+  const calculateReceiveAmount = (): string => {
     if (!selectedReceiveAsset || !noteAmount) return '';
     const exchangeRate = assets.find(a => a.denom === selectedReceiveAsset)?.amount;
     if (!exchangeRate) return '';
-    return (parseFloat(noteAmount) / parseFloat(exchangeRate)).toFixed(2);
+    return (parseFloat(noteAmount) / parseFloat(exchangeRate)).toFixed(6);
   };
 
   return (
@@ -71,7 +77,7 @@ export const SwapSection = () => {
                 onClick={() => {
                   if (selectedReceiveAsset && noteAmount) {
                     console.log(`Swapping ${noteAmount} NOTE for ${calculateReceiveAmount()} ${selectedReceiveAsset}`);
-                    //Call a function to perform the swap
+                    // Here you would typically call a function to perform the swap
                   } else {
                     alert('Please enter NOTE amount and select receive asset');
                   }
@@ -111,7 +117,7 @@ export const SwapSection = () => {
               />
               {selectedReceiveAsset && (
                 <p className="text-white">
-                  Exchange rate:  {assets.find(a => a.denom === selectedReceiveAsset)?.amount} note per {selectedReceiveAsset}
+                  Exchange rate: {assets.find(a => a.denom === selectedReceiveAsset)?.amount} note per {selectedReceiveAsset}
                 </p>
               )}
             </div>
