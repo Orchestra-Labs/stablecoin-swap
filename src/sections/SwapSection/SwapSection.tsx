@@ -3,7 +3,7 @@ import waves2 from '@/assets/images/waves-test.svg';
 import { getAssets } from './hooks/getAssets';
 import { connectKeplr } from './utils/keplrUtils';
 import { ChainData } from './types';
-import { fetchChainData } from './hooks';
+import { fetchWalletBalances } from './hooks';
 
 export const SwapSection = () => {
   const rpcUrl = 'https://symphony-api.kleomedes.network';
@@ -19,7 +19,8 @@ export const SwapSection = () => {
         const signer = await connectKeplr('symphony-testnet-3');
         if (signer) {
           console.log('Keplr connected successfully.');
-          const data = await fetchChainData(rpcUrl, signer);
+          const data = await fetchWalletBalances(rpcUrl, signer);
+          setSendAddress(data?.address ?? '');
           setChainData(data);
         }
       } catch (error) {
