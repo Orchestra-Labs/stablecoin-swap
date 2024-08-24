@@ -13,6 +13,7 @@ export const SwapSection = () => {
   const [noteAmount, setNoteAmount] = useState('');
   const [walletAssets, setWalletAssets] = useState<Asset[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
+  const [receiveAmount, setReceiveAmount] = useState('');
   const assets = getAssets(rpcUrl);
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export const SwapSection = () => {
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setNoteAmount(event.target.value);
+    calculateReceiveAmount(event.target.value, selectedReceiveAsset);
   };
 
   const handleSendAssetChange = (
@@ -54,8 +56,10 @@ export const SwapSection = () => {
     const asset = walletAssets.find(a => a.denom === selectedAsset);
     if (asset?.isIbc) {
       setErrorMessage('Invalid Asset: Cannot swap IBC tokens.');
+      setReceiveAmount(''); // Clear the receive amount if there's an error
     } else {
       setErrorMessage('');
+      calculateReceiveAmount(noteAmount, selectedReceiveAsset);
     }
   };
 
@@ -64,15 +68,29 @@ export const SwapSection = () => {
   ) => {
     const selectedAsset = event.target.value;
     setSelectedReceiveAsset(selectedAsset);
+    calculateReceiveAmount(noteAmount, selectedAsset);
   };
 
-  const calculateReceiveAmount = (): string => {
-    if (!selectedReceiveAsset || !noteAmount) return '';
-    const exchangeRate = assets.find(
-      a => a.denom === selectedReceiveAsset,
-    )?.amount;
-    if (!exchangeRate) return '';
-    return (parseFloat(noteAmount) / parseFloat(exchangeRate)).toFixed(6);
+  const calculateReceiveAmount = (noteAmount: string, receiveAsset: string) => {
+    if (!receiveAsset || !noteAmount) {
+      console.log('no receiving asset or no note amount');
+
+      setReceiveAmount('');
+      return '';
+    }
+    const exchangeRate = assets.find(a => a.denom === receiveAsset)?.amount;
+    if (!exchangeRate) {
+      console.log('no exchange rate');
+
+      setReceiveAmount('');
+      return '';
+    }
+    const amount = (parseFloat(noteAmount) / parseFloat(exchangeRate)).toFixed(
+      6,
+    );
+    console.log('expected receive amount:', amount);
+    setReceiveAmount(amount);
+    return amount;
   };
 
   return (
@@ -127,7 +145,7 @@ export const SwapSection = () => {
                 onClick={() => {
                   if (selectedReceiveAsset && noteAmount) {
                     console.log(
-                      `Swapping ${noteAmount} NOTE for ${calculateReceiveAmount()} ${selectedReceiveAsset}`,
+                      `Swapping ${noteAmount} NOTE for ${receiveAmount} ${selectedReceiveAsset}`,
                     );
                     // Here you would typically call a function to perform the swap
                   } else {
@@ -156,7 +174,7 @@ export const SwapSection = () => {
               </select>
               <input
                 type="text"
-                value={calculateReceiveAmount()}
+                value={receiveAmount}
                 className="w-full mb-4 p-2 border rounded text-black"
                 readOnly
                 placeholder="Receive amount"
