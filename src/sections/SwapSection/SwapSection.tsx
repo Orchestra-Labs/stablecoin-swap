@@ -5,6 +5,7 @@ import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
 import { useChain } from '@cosmos-kit/react';
 import { defaultChainName } from '@/constants';
+import { useTest } from '@/hooks/useTest';
 
 export const SwapSection = () => {
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
@@ -18,16 +19,25 @@ export const SwapSection = () => {
   const { data: walletAssetsData } = useWalletAssets();
   const walletAssets = walletAssetsData;
 
+  const { error } = useTest();
+
+  console.log('error', error);
+
   const {
     connect,
     closeView,
+    isWalletConnected,
     address: sendAddress,
   } = useChain(defaultChainName);
 
   useEffect(() => {
-    connect();
-    closeView();
-  }, [closeView, connect]);
+    async function connectWallet() {
+      if (isWalletConnected) return;
+      await connect();
+    }
+
+    connectWallet().catch(console.error);
+  }, [closeView, connect, isWalletConnected]);
 
   const handleNoteAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,

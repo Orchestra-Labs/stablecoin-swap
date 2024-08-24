@@ -12040,9 +12040,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "symphony-markup@workspace:."
   dependencies:
+    "@cosmjs/amino": "npm:^0.32.4"
     "@cosmjs/launchpad": "npm:^0.27.1"
     "@cosmjs/proto-signing": "npm:^0.32.4"
     "@cosmjs/stargate": "npm:^0.32.4"
+    "@cosmos-kit/core": "npm:^2.13.1"
     "@cosmos-kit/keplr": "npm:^2.12.2"
     "@cosmos-kit/react": "npm:^2.18.0"
     "@interchain-ui/react": "npm:^1.23.31"

@@ -44,7 +44,6 @@ export function useWalletAssets() {
           isIbc: balance.denom.startsWith('ibc/'),
         }),
       );
-      console.log('Assets', assets);
       return assets;
     },
   });

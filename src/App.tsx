@@ -11,6 +11,7 @@ import { assets, chains } from 'chain-registry/testnet';
 import { chainEndpoint, defaultChainName } from '@/constants';
 import { wallets } from '@cosmos-kit/keplr';
 import { ChainProvider } from '@cosmos-kit/react';
+import { SignerOptions } from 'cosmos-kit';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,16 +22,19 @@ const queryClient = new QueryClient({
   },
 });
 
+const signerOptions: SignerOptions = {};
+
 export default function App() {
   return (
     <ChainProvider
       chains={chains.filter(c => c.chain_name === defaultChainName)} // supported chains
       assetLists={assets} // supported asset lists
       wallets={wallets} // supported wallets,
+      signerOptions={signerOptions}
       endpointOptions={{
         isLazy: true,
         endpoints: {
-          juno: {
+          symphonytestnet: {
             rpc: chainEndpoint.symphonytestnet.rpc,
             rest: chainEndpoint.symphonytestnet.rest,
           },
