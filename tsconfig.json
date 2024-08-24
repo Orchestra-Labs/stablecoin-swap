@@ -20,26 +20,17 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-
-    "types": [
-      "vite/client",
-    ],
-    "typeRoots": [
-      "src/types/**/*",
-      "node_modules/@types"
-    ],
-
+    "types": ["vite/client"],
+    "typeRoots": ["src/types/**/*", "node_modules/@types"],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   },
-
   "include": [
     "vite.config.ts",
     ".eslintrc.js",
     "src/**/*",
     "tailwind.config.js"
-  ]
+  ],
+  "exclude": ["node_modules/@keplr-wallet/types"]
 }

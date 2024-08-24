@@ -1,43 +1,55 @@
-import waves2 from '@/assets/images/waves-test.svg';
 import { useState, useEffect } from 'react';
-
-// Define the type for an individual asset
-interface Asset {
-  denom: string;
-  amount: string;
-}
+import waves2 from '@/assets/images/waves-test.svg';
+import { getAssets } from './hooks/getAssets';
+import { connectKeplr } from './utils/keplrUtils';
+import { fetchWalletAssets } from './hooks';
+import { Asset } from './types';
 
 export const SwapSection = () => {
+  const rpcUrl = 'https://symphony-api.kleomedes.network';
   const [sendAddress, setSendAddress] = useState('');
-  const [assets, setAssets] = useState<Asset[]>([]);
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
+  const [selectedSendAsset, setSelectedSendAsset] = useState('');
   const [noteAmount, setNoteAmount] = useState('');
+  const [walletAssets, setWalletAssets] = useState<Asset[]>([]);
+  const assets = getAssets(rpcUrl);
 
   useEffect(() => {
-    fetchAssets();
-  }, []);
+    const initializeKeplr = async () => {
+      try {
+        const signer = await connectKeplr('symphony-testnet-3');
+        if (signer) {
+          console.log('Keplr connected successfully.');
+          const accounts = await signer.getAccounts();
+          const walletAddress = accounts[0].address;
+          setSendAddress(walletAddress);
 
-  const fetchAssets = async () => {
-    try {
-      const response = await fetch('https://symphony-api.kleomedes.network/osmosis/oracle/v1beta1/denoms/exchange_rates');
-      const data = await response.json();
-      setAssets(data.exchange_rates);
-    } catch (error) {
-      console.error('Error fetching assets:', error);
-    }
-  };
+          const data = await fetchWalletAssets(rpcUrl, walletAddress);
+          setWalletAssets(data?.assets ?? []);
+        }
+      } catch (error) {
+        console.error('Failed to connect to Keplr:', error);
+      }
+    };
+
+    initializeKeplr();
+  }, []);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSendAddress(event.target.value);
   };
 
-  const handleNoteAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNoteAmountChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setNoteAmount(event.target.value);
   };
 
   const calculateReceiveAmount = (): string => {
     if (!selectedReceiveAsset || !noteAmount) return '';
-    const exchangeRate = assets.find(a => a.denom === selectedReceiveAsset)?.amount;
+    const exchangeRate = assets.find(
+      a => a.denom === selectedReceiveAsset,
+    )?.amount;
     if (!exchangeRate) return '';
     return (parseFloat(noteAmount) / parseFloat(exchangeRate)).toFixed(6);
   };
@@ -55,6 +67,18 @@ export const SwapSection = () => {
             {/* Swap Box 1 */}
             <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2">
               <h3 className="text-white mb-2">Send NOTE</h3>
+              <select
+                className="w-full mb-4 p-2 border rounded text-black"
+                value={selectedSendAsset}
+                onChange={e => setSelectedSendAsset(e.target.value)}
+              >
+                <option value="">Select send asset</option>
+                {(walletAssets ?? []).map(asset => (
+                  <option key={asset.denom} value={asset.denom}>
+                    {asset.denom}
+                  </option>
+                ))}
+              </select>
               <input
                 type="number"
                 placeholder="Amount of NOTE"
@@ -66,17 +90,20 @@ export const SwapSection = () => {
                 type="text"
                 placeholder="Wallet Address"
                 className="w-full mb-4 p-2 border rounded text-black"
-                onInput={handleInputChange}
+                value={sendAddress}
+                onChange={handleInputChange}
               />
             </div>
 
             <div className="flex flex-col items-center justify-center gap-4">
               {/* Swap Button */}
-              <button 
+              <button
                 className="bg-black py-3 px-6 rounded-lg font-semibold border border-green-700 hover:bg-green-600 transition"
                 onClick={() => {
                   if (selectedReceiveAsset && noteAmount) {
-                    console.log(`Swapping ${noteAmount} NOTE for ${calculateReceiveAmount()} ${selectedReceiveAsset}`);
+                    console.log(
+                      `Swapping ${noteAmount} NOTE for ${calculateReceiveAmount()} ${selectedReceiveAsset}`,
+                    );
                     // Here you would typically call a function to perform the swap
                   } else {
                     alert('Please enter NOTE amount and select receive asset');
@@ -89,13 +116,13 @@ export const SwapSection = () => {
 
             {/* Swap Box 2 */}
             <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2">
-              <select 
+              <select
                 className="w-full mb-4 p-2 border rounded text-black"
                 value={selectedReceiveAsset}
-                onChange={(e) => setSelectedReceiveAsset(e.target.value)}
+                onChange={e => setSelectedReceiveAsset(e.target.value)}
               >
                 <option value="">Select receive asset</option>
-                {assets.map((asset) => (
+                {assets.map(asset => (
                   <option key={asset.denom} value={asset.denom}>
                     {asset.denom}
                   </option>
@@ -117,7 +144,9 @@ export const SwapSection = () => {
               />
               {selectedReceiveAsset && (
                 <p className="text-white">
-                  Exchange rate: {assets.find(a => a.denom === selectedReceiveAsset)?.amount} note per {selectedReceiveAsset}
+                  Exchange rate:{' '}
+                  {assets.find(a => a.denom === selectedReceiveAsset)?.amount}{' '}
+                  note per {selectedReceiveAsset}
                 </p>
               )}
             </div>
