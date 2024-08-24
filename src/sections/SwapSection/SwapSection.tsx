@@ -1,43 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+
 import waves2 from '@/assets/images/waves-test.svg';
-import { getAssets } from './hooks/getAssets';
-import { connectKeplr } from './utils/keplrUtils';
-import { fetchWalletAssets } from './hooks';
-import { Asset } from './types';
+import { useKeplr } from '@/hooks';
+import { useOracleAssets } from '@/hooks/useOracleAssets';
+import { useWalletAssets } from '@/hooks/useWalletAssets';
 
 export const SwapSection = () => {
-  const rpcUrl = 'https://symphony-api.kleomedes.network';
-  const [sendAddress, setSendAddress] = useState('');
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
   const [selectedSendAsset, setSelectedSendAsset] = useState('');
   const [noteAmount, setNoteAmount] = useState('');
-  const [walletAssets, setWalletAssets] = useState<Asset[]>([]);
-  const assets = getAssets(rpcUrl);
+  const { assets } = useOracleAssets();
 
-  useEffect(() => {
-    const initializeKeplr = async () => {
-      try {
-        const signer = await connectKeplr('symphony-testnet-3');
-        if (signer) {
-          console.log('Keplr connected successfully.');
-          const accounts = await signer.getAccounts();
-          const walletAddress = accounts[0].address;
-          setSendAddress(walletAddress);
+  const { data: keplrData } = useKeplr();
+  const sendAddress = keplrData?.walletAddress;
 
-          const data = await fetchWalletAssets(rpcUrl, walletAddress);
-          setWalletAssets(data?.assets ?? []);
-        }
-      } catch (error) {
-        console.error('Failed to connect to Keplr:', error);
-      }
-    };
-
-    initializeKeplr();
-  }, []);
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSendAddress(event.target.value);
-  };
+  const { data: walletAssetsData } = useWalletAssets();
+  const walletAssets = walletAssetsData;
 
   const handleNoteAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -91,7 +69,6 @@ export const SwapSection = () => {
                 placeholder="Wallet Address"
                 className="w-full mb-4 p-2 border rounded text-black"
                 value={sendAddress}
-                onChange={handleInputChange}
               />
             </div>
 
@@ -99,6 +76,7 @@ export const SwapSection = () => {
               {/* Swap Button */}
               <button
                 className="bg-black py-3 px-6 rounded-lg font-semibold border border-green-700 hover:bg-green-600 transition"
+                type="button"
                 onClick={() => {
                   if (selectedReceiveAsset && noteAmount) {
                     console.log(

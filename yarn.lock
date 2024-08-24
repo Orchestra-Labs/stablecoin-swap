@@ -1719,6 +1719,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.52.0":
+  version: 5.52.0
+  resolution: "@tanstack/query-core@npm:5.52.0"
+  checksum: 10c0/6f2309294d23721e4508241a4e109d6134bd125b732271217181ae99cc7994ec02ff964397e08bc5e9af5302e3838a3f3259d6e49fdf6fc8aaf324bc4fde4939
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.52.1":
+  version: 5.52.1
+  resolution: "@tanstack/react-query@npm:5.52.1"
+  dependencies:
+    "@tanstack/query-core": "npm:5.52.0"
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 10c0/a07697446311e908173bcce25ccbf019d7ffde19a7607b6791195414f1b337754f48d3d40b8100283e0fea556295240ecf9fe7bb39b3c1f3040d1ac38da03485
+  languageName: node
+  linkType: hard
+
 "@types/babel__core@npm:^7.20.5":
   version: 7.20.5
   resolution: "@types/babel__core@npm:7.20.5"
@@ -6360,6 +6378,7 @@ __metadata:
     "@radix-ui/react-slot": "npm:~1.0.2"
     "@radix-ui/react-tabs": "npm:~1.0.4"
     "@splidejs/react-splide": "npm:~0.7.12"
+    "@tanstack/react-query": "npm:^5.52.1"
     "@types/react": "npm:~18.2.65"
     "@types/react-dom": "npm:~18.2.21"
     "@typescript-eslint/eslint-plugin": "npm:~7.2.0"
