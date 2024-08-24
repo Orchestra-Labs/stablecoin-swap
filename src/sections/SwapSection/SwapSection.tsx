@@ -1,26 +1,34 @@
 import { useState, useEffect } from 'react';
 import waves2 from '@/assets/images/waves-test.svg';
-import { useAssets } from './hooks/useAssets';
-import { connectKeplr } from './utils/keplrUtils'; // Adjust the path as needed
+import { getAssets } from './hooks/getAssets';
+import { connectKeplr } from './utils/keplrUtils';
+import { ChainData } from './types';
+import { fetchChainData } from './hooks';
 
 export const SwapSection = () => {
+  const rpcUrl = 'https://symphony-api.kleomedes.network';
   const [sendAddress, setSendAddress] = useState('');
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
   const [noteAmount, setNoteAmount] = useState('');
-  const assets = useAssets();
+  const [chainData, setChainData] = useState<ChainData | null>(null);
+  const assets = getAssets(rpcUrl);
 
   useEffect(() => {
-    // Connect to Keplr when the component mounts
-    connectKeplr('cosmoshub-4')
-      .then(client => {
-        if (client) {
+    const initializeKeplr = async () => {
+      try {
+        const signer = await connectKeplr('symphony-testnet-3');
+        if (signer) {
           console.log('Keplr connected successfully.');
+          const data = await fetchChainData(rpcUrl, signer);
+          setChainData(data);
         }
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Failed to connect to Keplr:', error);
-      });
-  }, []);
+      }
+    };
+
+    initializeKeplr();
+  }, [rpcUrl]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSendAddress(event.target.value);
@@ -65,7 +73,8 @@ export const SwapSection = () => {
                 type="text"
                 placeholder="Wallet Address"
                 className="w-full mb-4 p-2 border rounded text-black"
-                onInput={handleInputChange}
+                value={sendAddress}
+                onChange={handleInputChange}
               />
             </div>
 
@@ -111,7 +120,7 @@ export const SwapSection = () => {
               />
               <input
                 type="text"
-                placeholder={sendAddress || 'Wallet Address'}
+                placeholder={chainData?.address || 'Wallet Address'}
                 className="w-full mb-4 p-2 border rounded text-black"
                 id="receiveAddress"
                 readOnly
