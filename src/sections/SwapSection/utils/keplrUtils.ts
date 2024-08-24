@@ -46,10 +46,6 @@ export const connectKeplr = async (
     throw new Error('OfflineSigner is not available');
   }
 
-  // Get the accounts from the offline signer
-  const accounts = await offlineSigner.getAccounts();
-  console.log(`Connected to blockchain with address: ${accounts[0].address}`);
-
   // Return the offline signer instead of the client
   return offlineSigner;
 };
