@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import waves2 from '@/assets/images/waves-test.svg';
-import { useKeplr } from '@/hooks';
 import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
+import { useChain } from '@cosmos-kit/react';
+import { defaultChainName } from '@/constants';
 
 export const SwapSection = () => {
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
@@ -11,13 +12,22 @@ export const SwapSection = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [receiveAmount, setReceiveAmount] = useState('');
   const [noteAmount, setNoteAmount] = useState('');
-  const { assets } = useOracleAssets();
 
-  const { data: keplrData } = useKeplr();
-  const sendAddress = keplrData?.walletAddress;
+  const { assets } = useOracleAssets();
 
   const { data: walletAssetsData } = useWalletAssets();
   const walletAssets = walletAssetsData;
+
+  const {
+    connect,
+    closeView,
+    address: sendAddress,
+  } = useChain(defaultChainName);
+
+  useEffect(() => {
+    connect();
+    closeView();
+  }, [closeView, connect]);
 
   const handleNoteAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,

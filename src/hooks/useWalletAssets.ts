@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { rpcUrl } from '@/constants';
-import { useKeplr } from '@/hooks/useKeplr.ts';
+import { defaultChainName, rpcUrl } from '@/constants';
+import { useChain } from '@cosmos-kit/react';
 import { Asset } from '@/sections';
 
 // Function to resolve IBC denom
@@ -25,15 +25,11 @@ const resolveIbcDenom = async (ibcDenom: string): Promise<string> => {
 };
 
 export function useWalletAssets() {
-  const {
-    data: keplrData,
-    isLoading: keplrIsLoading,
-    error: keplrError,
-  } = useKeplr();
-  const walletAddress = keplrData?.walletAddress;
+  const { address: walletAddress, isWalletConnected } =
+    useChain(defaultChainName);
   const assetsQuery = useQuery({
     queryKey: ['walletAssets', walletAddress],
-    enabled: !keplrIsLoading && !keplrError && !!walletAddress,
+    enabled: isWalletConnected,
     queryFn: async () => {
       const response = await fetch(
         `${rpcUrl}/cosmos/bank/v1beta1/spendable_balances/${walletAddress}`,
