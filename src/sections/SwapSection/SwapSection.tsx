@@ -33,7 +33,7 @@ export const SwapSection = () => {
     };
 
     initializeKeplr();
-  }, [rpcUrl]);
+  }, []);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSendAddress(event.target.value);
