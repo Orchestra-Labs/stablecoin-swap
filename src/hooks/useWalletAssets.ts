@@ -48,7 +48,7 @@ export function useWalletAssets() {
           isIbc: balance.denom.startsWith('ibc/'),
         }),
       );
-      console.log('Assets', assets);
+
       return assets;
     },
   });
@@ -63,9 +63,6 @@ export function useWalletAssets() {
         walletAssets!.map(async asset => {
           if (asset.isIbc) {
             const resolvedDenom = await resolveIbcDenom(asset.denom);
-            console.log(
-              `Resolved IBC denom ${asset.denom} to ${resolvedDenom}`,
-            );
             return { ...asset, denom: resolvedDenom };
           }
           return asset;
