@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 
+
 import waves2 from '@/assets/images/waves-test.svg';
+import { useKeplr } from '@/hooks';
 import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
+import { rpcUrl } from '@/constants';
 import { useChain } from '@cosmos-kit/react';
 import { defaultChainName } from '@/constants';
 import { useTest } from '@/hooks/useTest';
@@ -16,8 +19,11 @@ export const SwapSection = () => {
 
   const { assets } = useOracleAssets();
 
+  const { data: keplrData } = useKeplr();
+  const sendAddress = keplrData?.walletAddress || ''; // Ensure it's always a string
+
   const { data: walletAssetsData } = useWalletAssets();
-  const walletAssets = walletAssetsData;
+  const walletAssets = walletAssetsData || []; // Ensure it's always an array
 
   const { error } = useTest();
 
@@ -42,14 +48,14 @@ export const SwapSection = () => {
   const handleNoteAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    setNoteAmount(event.target.value);
+    setNoteAmount(event.target.value || ''); // Ensure value is never undefined
     calculateReceiveAmount(event.target.value, selectedReceiveAsset);
   };
 
   const handleSendAssetChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    const selectedAsset = event.target.value;
+    const selectedAsset = event.target.value || '';
     setSelectedSendAsset(selectedAsset);
 
     const asset = walletAssets.find(a => a.denom === selectedAsset);
@@ -65,7 +71,7 @@ export const SwapSection = () => {
   const handleReceiveAssetChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    const selectedAsset = event.target.value;
+    const selectedAsset = event.target.value || '';
     setSelectedReceiveAsset(selectedAsset);
     calculateReceiveAmount(noteAmount, selectedAsset);
   };
@@ -76,7 +82,8 @@ export const SwapSection = () => {
       return '';
     }
 
-    const exchangeRate = assets.find(a => a.denom === receiveAsset)?.amount;
+    const exchangeRate =
+      assets.find(a => a.denom === receiveAsset)?.amount || '0';
     if (!exchangeRate) {
       setReceiveAmount('');
       return '';
@@ -88,6 +95,44 @@ export const SwapSection = () => {
 
     setReceiveAmount(amount);
     return amount;
+  };
+
+  const performSwap = async () => {
+    if (!selectedReceiveAsset || !noteAmount || !selectedSendAsset) {
+      alert('Please enter NOTE amount and select both send and receive assets');
+      return;
+    }
+
+    try {
+      const swapRequestBody = {
+        trader: sendAddress,
+        offer_coin: `${noteAmount}${selectedSendAsset}`, // example: "1000000uluna"
+        ask_denom: selectedReceiveAsset,
+      };
+
+      const response = await fetch(`${rpcUrl}/symphony/market/v1beta1/swap`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(swapRequestBody),
+      });
+
+      const responseData = await response.json();
+      console.log('Swap response:', responseData);
+
+      // Assuming the response contains a field 'return_coin' for the swapped amount
+      if (response.ok) {
+        setReceiveAmount(responseData.return_coin.amount);
+      } else {
+        setErrorMessage(
+          `Swap failed: ${responseData.error || 'Unknown error'}`,
+        );
+      }
+    } catch (error) {
+      console.error('Error performing swap:', error);
+      setErrorMessage('An error occurred while trying to perform the swap.');
+    }
   };
 
   return (
@@ -113,7 +158,7 @@ export const SwapSection = () => {
                 onChange={handleSendAssetChange}
               >
                 <option value="">Select send asset</option>
-                {(walletAssets ?? []).map(asset => (
+                {walletAssets.map(asset => (
                   <option key={asset.denom} value={asset.denom}>
                     {asset.denom}
                   </option>
@@ -140,16 +185,7 @@ export const SwapSection = () => {
               <button
                 className="bg-black py-3 px-6 rounded-lg font-semibold border border-green-700 hover:bg-green-600 transition"
                 type="button"
-                onClick={() => {
-                  if (selectedReceiveAsset && noteAmount) {
-                    console.log(
-                      `Swapping ${noteAmount} NOTE for ${receiveAmount} ${selectedReceiveAsset}`,
-                    );
-                    // Here you would typically call a function to perform the swap
-                  } else {
-                    alert('Please enter NOTE amount and select receive asset');
-                  }
-                }}
+                onClick={performSwap}
               >
                 Initiate Swap
               </button>
