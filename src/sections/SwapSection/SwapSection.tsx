@@ -1,43 +1,42 @@
-import waves2 from '@/assets/images/waves-test.svg';
 import { useState, useEffect } from 'react';
-
-// Define the type for an individual asset
-interface Asset {
-  denom: string;
-  amount: string;
-}
+import waves2 from '@/assets/images/waves-test.svg';
+import { useAssets } from './hooks/useAssets';
+import { connectKeplr } from './utils/keplrUtils'; // Adjust the path as needed
 
 export const SwapSection = () => {
   const [sendAddress, setSendAddress] = useState('');
-  const [assets, setAssets] = useState<Asset[]>([]);
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
   const [noteAmount, setNoteAmount] = useState('');
+  const assets = useAssets();
 
   useEffect(() => {
-    fetchAssets();
+    // Connect to Keplr when the component mounts
+    connectKeplr('cosmoshub-4')
+      .then(client => {
+        if (client) {
+          console.log('Keplr connected successfully.');
+        }
+      })
+      .catch(error => {
+        console.error('Failed to connect to Keplr:', error);
+      });
   }, []);
-
-  const fetchAssets = async () => {
-    try {
-      const response = await fetch('https://symphony-api.kleomedes.network/osmosis/oracle/v1beta1/denoms/exchange_rates');
-      const data = await response.json();
-      setAssets(data.exchange_rates);
-    } catch (error) {
-      console.error('Error fetching assets:', error);
-    }
-  };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSendAddress(event.target.value);
   };
 
-  const handleNoteAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNoteAmountChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setNoteAmount(event.target.value);
   };
 
   const calculateReceiveAmount = (): string => {
     if (!selectedReceiveAsset || !noteAmount) return '';
-    const exchangeRate = assets.find(a => a.denom === selectedReceiveAsset)?.amount;
+    const exchangeRate = assets.find(
+      a => a.denom === selectedReceiveAsset,
+    )?.amount;
     if (!exchangeRate) return '';
     return (parseFloat(noteAmount) / parseFloat(exchangeRate)).toFixed(6);
   };
@@ -72,11 +71,13 @@ export const SwapSection = () => {
 
             <div className="flex flex-col items-center justify-center gap-4">
               {/* Swap Button */}
-              <button 
+              <button
                 className="bg-black py-3 px-6 rounded-lg font-semibold border border-green-700 hover:bg-green-600 transition"
                 onClick={() => {
                   if (selectedReceiveAsset && noteAmount) {
-                    console.log(`Swapping ${noteAmount} NOTE for ${calculateReceiveAmount()} ${selectedReceiveAsset}`);
+                    console.log(
+                      `Swapping ${noteAmount} NOTE for ${calculateReceiveAmount()} ${selectedReceiveAsset}`,
+                    );
                     // Here you would typically call a function to perform the swap
                   } else {
                     alert('Please enter NOTE amount and select receive asset');
@@ -89,13 +90,13 @@ export const SwapSection = () => {
 
             {/* Swap Box 2 */}
             <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2">
-              <select 
+              <select
                 className="w-full mb-4 p-2 border rounded text-black"
                 value={selectedReceiveAsset}
-                onChange={(e) => setSelectedReceiveAsset(e.target.value)}
+                onChange={e => setSelectedReceiveAsset(e.target.value)}
               >
                 <option value="">Select receive asset</option>
-                {assets.map((asset) => (
+                {assets.map(asset => (
                   <option key={asset.denom} value={asset.denom}>
                     {asset.denom}
                   </option>
@@ -117,7 +118,9 @@ export const SwapSection = () => {
               />
               {selectedReceiveAsset && (
                 <p className="text-white">
-                  Exchange rate: {assets.find(a => a.denom === selectedReceiveAsset)?.amount} note per {selectedReceiveAsset}
+                  Exchange rate:{' '}
+                  {assets.find(a => a.denom === selectedReceiveAsset)?.amount}{' '}
+                  note per {selectedReceiveAsset}
                 </p>
               )}
             </div>
