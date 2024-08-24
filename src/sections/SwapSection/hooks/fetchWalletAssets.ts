@@ -5,40 +5,34 @@ export const fetchWalletAssets = async (
   walletAddress: string,
 ): Promise<WalletAssets | null> => {
   try {
-    // Fetch balances from the provided API
     const response = await fetch(
       `${rpcUrl}/cosmos/bank/v1beta1/spendable_balances/${walletAddress}`,
     );
     const data = await response.json();
 
-    // Extract assets from the balances
     const assets: Asset[] = data.balances.map(
       (balance: { denom: string; amount: string }) => ({
         denom: balance.denom,
         amount: balance.amount,
+        isIbc: balance.denom.startsWith('ibc/'), // Set the isIbc flag
       }),
     );
 
-    // Resolve the names of IBC denoms concurrently using Promise.all
     const resolvedAssets = await Promise.all(
       assets.map(async asset => {
-        if (asset.denom.startsWith('ibc/')) {
+        if (asset.isIbc) {
           const resolvedDenom = await resolveIbcDenom(rpcUrl, asset.denom);
-          console.log(`Resolved IBC denom ${asset.denom} to ${resolvedDenom}`);
           return { ...asset, denom: resolvedDenom };
         }
         return asset;
       }),
     );
 
-    console.log('Resolved assets:', resolvedAssets);
-
     return {
       address: walletAddress,
       assets: resolvedAssets,
     };
   } catch (error) {
-    console.error('Error fetching chain data:', error);
     return null;
   }
 };

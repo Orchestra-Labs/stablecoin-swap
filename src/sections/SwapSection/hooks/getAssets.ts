@@ -11,7 +11,14 @@ export const getAssets = (rpcUrl: string) => {
           `${rpcUrl}/osmosis/oracle/v1beta1/denoms/exchange_rates`,
         );
         const data = await response.json();
-        setAssets(data.exchange_rates);
+
+        const formattedAssets = data.exchange_rates.map((asset: any) => ({
+          ...asset,
+          amount: parseFloat(asset.amount).toFixed(6),
+          isIbc: false,
+        }));
+
+        setAssets(formattedAssets);
       } catch (error) {
         console.error('Error fetching assets:', error);
       }
