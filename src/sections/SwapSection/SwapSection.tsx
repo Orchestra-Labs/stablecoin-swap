@@ -12,6 +12,7 @@ export const SwapSection = () => {
   const [selectedSendAsset, setSelectedSendAsset] = useState('');
   const [noteAmount, setNoteAmount] = useState('');
   const [walletAssets, setWalletAssets] = useState<Asset[]>([]);
+  const [errorMessage, setErrorMessage] = useState('');
   const assets = getAssets(rpcUrl);
 
   useEffect(() => {
@@ -19,7 +20,6 @@ export const SwapSection = () => {
       try {
         const signer = await connectKeplr('symphony-testnet-3');
         if (signer) {
-          console.log('Keplr connected successfully.');
           const accounts = await signer.getAccounts();
           const walletAddress = accounts[0].address;
           setSendAddress(walletAddress);
@@ -45,6 +45,27 @@ export const SwapSection = () => {
     setNoteAmount(event.target.value);
   };
 
+  const handleSendAssetChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const selectedAsset = event.target.value;
+    setSelectedSendAsset(selectedAsset);
+
+    const asset = walletAssets.find(a => a.denom === selectedAsset);
+    if (asset?.isIbc) {
+      setErrorMessage('Invalid Asset: Cannot swap IBC tokens.');
+    } else {
+      setErrorMessage('');
+    }
+  };
+
+  const handleReceiveAssetChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const selectedAsset = event.target.value;
+    setSelectedReceiveAsset(selectedAsset);
+  };
+
   const calculateReceiveAmount = (): string => {
     if (!selectedReceiveAsset || !noteAmount) return '';
     const exchangeRate = assets.find(
@@ -59,18 +80,22 @@ export const SwapSection = () => {
       <div className="absolute bg-hero-blur-circle blur-[180px] w-[372px] h-[372px] rounded-full top-1/2 left-1/2 -translate-x-2/4 -translate-y-2/4 transition-size duration-500" />
       <div className="flex justify-center items-center min-h-[inherit] relative z-[1] px-25px md:px-6">
         <div className="flex flex-col max-w-[882px] text-center items-center gap-4 mt-[-50%] md:-mt-40 xl:-mt-[120px]">
-          <h1 className="font-semibold text-white text-h4 md:text-h2/[56px] xl:text-display2">
+          <h1 className="font-semibold text-white text-h4 md:text-h2/[56px] xl:text-display2 mt-12">
             Discover truly decentralized real-world assets
           </h1>
 
-          <div className="flex justify-between items-center w-full gap-8 mt-8">
+          <div className="min-h-[24px]">
+            <p className="text-error">{errorMessage}</p>{' '}
+          </div>
+
+          <div className="flex justify-between items-center w-full gap-8">
             {/* Swap Box 1 */}
             <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2">
-              <h3 className="text-white mb-2">Send NOTE</h3>
+              <h3 className="text-white mb-2">Send</h3>
               <select
                 className="w-full mb-4 p-2 border rounded text-black"
                 value={selectedSendAsset}
-                onChange={e => setSelectedSendAsset(e.target.value)}
+                onChange={handleSendAssetChange}
               >
                 <option value="">Select send asset</option>
                 {(walletAssets ?? []).map(asset => (
@@ -116,10 +141,11 @@ export const SwapSection = () => {
 
             {/* Swap Box 2 */}
             <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2">
+              <h3 className="text-white mb-2">Receive</h3>
               <select
                 className="w-full mb-4 p-2 border rounded text-black"
                 value={selectedReceiveAsset}
-                onChange={e => setSelectedReceiveAsset(e.target.value)}
+                onChange={handleReceiveAssetChange}
               >
                 <option value="">Select receive asset</option>
                 {assets.map(asset => (
