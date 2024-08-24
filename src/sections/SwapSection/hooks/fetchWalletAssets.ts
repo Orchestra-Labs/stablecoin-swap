@@ -1,4 +1,3 @@
-import { StargateClient } from '@cosmjs/stargate';
 import { Asset, WalletAssets } from '../types';
 
 export const fetchWalletAssets = async (
@@ -8,18 +7,13 @@ export const fetchWalletAssets = async (
   try {
     // Fetch balances from the provided API
     const response = await fetch(
-      `${rpcUrl}/osmosis/bank/v1beta1/spendable_balances/${walletAddress}`,
+      `${rpcUrl}/cosmos/bank/v1beta1/spendable_balances/${walletAddress}`,
     );
     const data = await response.json();
     console.log(data);
 
-    // Get the balances using the queryClient
-    const queryClient = await StargateClient.connect(rpcUrl);
-    const balances = await queryClient.getAllBalances(walletAddress);
-    console.log(balances);
-
     // Extract assets from the balances
-    const assets: Asset[] = balances.map(
+    const assets: Asset[] = data.balances.map(
       (balance: { denom: string; amount: string }) => ({
         denom: balance.denom,
         amount: balance.amount,
