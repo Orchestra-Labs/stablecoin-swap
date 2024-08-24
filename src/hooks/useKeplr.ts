@@ -8,7 +8,6 @@ export function useKeplr() {
     queryKey: ['connectKeplr'],
     queryFn: async () => {
       const signer = await connectKeplr('symphony-testnet-3');
-      console.log('Keplr connected successfully.');
       const accounts = await signer!.getAccounts();
       const walletAddress = accounts[0].address;
       return {

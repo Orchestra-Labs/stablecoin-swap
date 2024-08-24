@@ -7,6 +7,13 @@ export default defineConfig({
   server: {
     open: true,
     host: true,
+    proxy: {
+      '/api': {
+        target: 'https://symphony-api.kleomedes.network',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api/, ''),
+      },
+    },
   },
   preview: {
     open: false,
