@@ -1,2 +1,2 @@
-export * from './fetchWalletBalances';
+export * from './fetchWalletAssets';
 export * from './getAssets';

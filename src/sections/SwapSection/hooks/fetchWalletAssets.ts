@@ -1,26 +1,21 @@
 import { StargateClient } from '@cosmjs/stargate';
-import { OfflineSigner } from '@cosmjs/proto-signing';
-import { Asset, ChainData } from '../types';
+import { Asset, WalletAssets } from '../types';
 
-export const fetchWalletBalances = async (
+export const fetchWalletAssets = async (
   rpcUrl: string,
-  signer: OfflineSigner,
-): Promise<ChainData | null> => {
+  walletAddress: string,
+): Promise<WalletAssets | null> => {
   try {
-    // Get the accounts from the signer
-    const accounts = await signer.getAccounts();
-    const symphonyAddress = accounts[0].address;
-
     // Fetch balances from the provided API
     const response = await fetch(
-      `${rpcUrl}/osmosis/bank/v1beta1/spendable_balances/${symphonyAddress}`,
+      `${rpcUrl}/osmosis/bank/v1beta1/spendable_balances/${walletAddress}`,
     );
     const data = await response.json();
     console.log(data);
 
     // Get the balances using the queryClient
     const queryClient = await StargateClient.connect(rpcUrl);
-    const balances = await queryClient.getAllBalances(symphonyAddress);
+    const balances = await queryClient.getAllBalances(walletAddress);
     console.log(balances);
 
     // Extract assets from the balances
@@ -32,7 +27,7 @@ export const fetchWalletBalances = async (
     );
 
     return {
-      address: symphonyAddress,
+      address: walletAddress,
       assets,
     };
   } catch (error) {

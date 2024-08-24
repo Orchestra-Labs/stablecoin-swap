@@ -2,15 +2,16 @@ import { useState, useEffect } from 'react';
 import waves2 from '@/assets/images/waves-test.svg';
 import { getAssets } from './hooks/getAssets';
 import { connectKeplr } from './utils/keplrUtils';
-import { ChainData } from './types';
-import { fetchWalletBalances } from './hooks';
+import { fetchWalletAssets } from './hooks';
+import { Asset } from './types';
 
 export const SwapSection = () => {
   const rpcUrl = 'https://symphony-api.kleomedes.network';
   const [sendAddress, setSendAddress] = useState('');
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
+  const [selectedSendAsset, setSelectedSendAsset] = useState('');
   const [noteAmount, setNoteAmount] = useState('');
-  const [chainData, setChainData] = useState<ChainData | null>(null);
+  const [walletAssets, setWalletAssets] = useState<Asset[]>([]);
   const assets = getAssets(rpcUrl);
 
   useEffect(() => {
@@ -19,9 +20,12 @@ export const SwapSection = () => {
         const signer = await connectKeplr('symphony-testnet-3');
         if (signer) {
           console.log('Keplr connected successfully.');
-          const data = await fetchWalletBalances(rpcUrl, signer);
-          setSendAddress(data?.address ?? '');
-          setChainData(data);
+          const accounts = await signer.getAccounts();
+          const walletAddress = accounts[0].address;
+          setSendAddress(walletAddress);
+
+          const data = await fetchWalletAssets(rpcUrl, walletAddress);
+          setWalletAssets(data?.assets ?? []);
         }
       } catch (error) {
         console.error('Failed to connect to Keplr:', error);
@@ -63,6 +67,18 @@ export const SwapSection = () => {
             {/* Swap Box 1 */}
             <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2">
               <h3 className="text-white mb-2">Send NOTE</h3>
+              <select
+                className="w-full mb-4 p-2 border rounded text-black"
+                value={selectedSendAsset}
+                onChange={e => setSelectedSendAsset(e.target.value)}
+              >
+                <option value="">Select send asset</option>
+                {(walletAssets ?? []).map(asset => (
+                  <option key={asset.denom} value={asset.denom}>
+                    {asset.denom}
+                  </option>
+                ))}
+              </select>
               <input
                 type="number"
                 placeholder="Amount of NOTE"
@@ -121,7 +137,7 @@ export const SwapSection = () => {
               />
               <input
                 type="text"
-                placeholder={chainData?.address || 'Wallet Address'}
+                placeholder={sendAddress || 'Wallet Address'}
                 className="w-full mb-4 p-2 border rounded text-black"
                 id="receiveAddress"
                 readOnly

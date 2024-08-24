@@ -3,7 +3,7 @@ export interface Asset {
   amount: string;
 }
 
-export interface ChainData {
+export interface WalletAssets {
   address: string;
   assets: Asset[];
 }
