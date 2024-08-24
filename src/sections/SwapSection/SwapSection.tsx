@@ -73,22 +73,20 @@ export const SwapSection = () => {
 
   const calculateReceiveAmount = (noteAmount: string, receiveAsset: string) => {
     if (!receiveAsset || !noteAmount) {
-      console.log('no receiving asset or no note amount');
-
       setReceiveAmount('');
       return '';
     }
+
     const exchangeRate = assets.find(a => a.denom === receiveAsset)?.amount;
     if (!exchangeRate) {
-      console.log('no exchange rate');
-
       setReceiveAmount('');
       return '';
     }
+
     const amount = (parseFloat(noteAmount) / parseFloat(exchangeRate)).toFixed(
       6,
     );
-    console.log('expected receive amount:', amount);
+
     setReceiveAmount(amount);
     return amount;
   };

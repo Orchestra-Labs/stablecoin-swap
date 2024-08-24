@@ -22,21 +22,17 @@ export const fetchWalletAssets = async (
       assets.map(async asset => {
         if (asset.isIbc) {
           const resolvedDenom = await resolveIbcDenom(rpcUrl, asset.denom);
-          console.log(`Resolved IBC denom ${asset.denom} to ${resolvedDenom}`);
           return { ...asset, denom: resolvedDenom };
         }
         return asset;
       }),
     );
 
-    console.log('Resolved assets:', resolvedAssets);
-
     return {
       address: walletAddress,
       assets: resolvedAssets,
     };
   } catch (error) {
-    console.error('Error fetching chain data:', error);
     return null;
   }
 };
