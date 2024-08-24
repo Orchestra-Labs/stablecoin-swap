@@ -45,6 +45,7 @@ export function useWalletAssets() {
         (balance: { denom: string; amount: string }) => ({
           denom: balance.denom,
           amount: balance.amount,
+          isIbc: balance.denom.startsWith('ibc/'),
         }),
       );
       console.log('Assets', assets);
@@ -60,7 +61,7 @@ export function useWalletAssets() {
     queryFn: async () => {
       const resolvedAssets = await Promise.all(
         walletAssets!.map(async asset => {
-          if (asset.denom.startsWith('ibc/')) {
+          if (asset.isIbc) {
             const resolvedDenom = await resolveIbcDenom(asset.denom);
             console.log(
               `Resolved IBC denom ${asset.denom} to ${resolvedDenom}`,
@@ -82,6 +83,6 @@ export function useWalletAssets() {
   return {
     isLoading: assetsQuery.isLoading || resolvedAddressesQuery.isLoading,
     error: assetsQuery.error || resolvedAddressesQuery.error,
-    data: resolvedAssets,
+    data: resolvedAssets ?? [],
   };
 }

@@ -8,6 +8,8 @@ import { useWalletAssets } from '@/hooks/useWalletAssets';
 export const SwapSection = () => {
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
   const [selectedSendAsset, setSelectedSendAsset] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [receiveAmount, setReceiveAmount] = useState('');
   const [noteAmount, setNoteAmount] = useState('');
   const { assets } = useOracleAssets();
 
@@ -106,6 +108,7 @@ export const SwapSection = () => {
               />
               <input
                 type="text"
+                readOnly
                 placeholder="Wallet Address"
                 className="w-full mb-4 p-2 border rounded text-black"
                 value={sendAddress}
