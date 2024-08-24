@@ -1,5 +1,5 @@
-import { Keplr, Window as KeplrWindow } from '@keplr-wallet/types';
 import { OfflineSigner } from '@cosmjs/proto-signing';
+import { Keplr, Window as KeplrWindow } from '@keplr-wallet/types';
 
 declare global {
   interface Window extends KeplrWindow {}
