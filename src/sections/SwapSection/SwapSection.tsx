@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 
-
 import waves2 from '@/assets/images/waves-test.svg';
-import { useKeplr } from '@/hooks';
 import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
 import { rpcUrl } from '@/constants';
@@ -18,9 +16,6 @@ export const SwapSection = () => {
   const [noteAmount, setNoteAmount] = useState('');
 
   const { assets } = useOracleAssets();
-
-  const { data: keplrData } = useKeplr();
-  const sendAddress = keplrData?.walletAddress || ''; // Ensure it's always a string
 
   const { data: walletAssetsData } = useWalletAssets();
   const walletAssets = walletAssetsData || []; // Ensure it's always an array

@@ -3,11 +3,7 @@ export const rpcUrl = '/api';
 export const defaultChainName = 'symphonytestnet';
 export const chainEndpoint = {
   symphonytestnet: {
-    rpc: [
-      'https://symphony.test.rpc.nodeshub.online',
-      'https://symphony-testnet-rpc.cogwheel.zone',
-      'https://symphony-rpc.kleomedes.network',
-    ],
+    rpc: [' http://localhost:5173/rpc'],
     rest: ['https://symphony-api.kleomedes.network'],
   },
 };

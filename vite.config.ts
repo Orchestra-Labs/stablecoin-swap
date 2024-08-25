@@ -14,6 +14,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, ''),
       },
+      '/rpc': {
+        target: 'https://symphony-rpc.kleomedes.network',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/rpc/, ''),
+      },
     },
   },
   preview: {
