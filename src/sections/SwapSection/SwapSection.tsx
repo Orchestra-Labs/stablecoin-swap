@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
 import waves2 from '@/assets/images/waves-test.svg';
-import { useKeplr } from '@/hooks';
 import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
 import { rpcUrl } from '@/constants';
+import { useChain } from '@cosmos-kit/react';
+import { defaultChainName } from '@/constants';
+import { useTest } from '@/hooks/useTest';
 
 export const SwapSection = () => {
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
@@ -11,13 +14,31 @@ export const SwapSection = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [receiveAmount, setReceiveAmount] = useState('');
   const [noteAmount, setNoteAmount] = useState('');
-  const { assets } = useOracleAssets();
 
-  const { data: keplrData } = useKeplr();
-  const sendAddress = keplrData?.walletAddress || ''; // Ensure it's always a string
+  const { assets } = useOracleAssets();
 
   const { data: walletAssetsData } = useWalletAssets();
   const walletAssets = walletAssetsData || []; // Ensure it's always an array
+
+  const { error } = useTest();
+
+  console.log('error', error);
+
+  const {
+    connect,
+    closeView,
+    isWalletConnected,
+    address: sendAddress,
+  } = useChain(defaultChainName);
+
+  useEffect(() => {
+    async function connectWallet() {
+      if (isWalletConnected) return;
+      await connect();
+    }
+
+    connectWallet().catch(console.error);
+  }, [closeView, connect, isWalletConnected]);
 
   const handleNoteAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,
