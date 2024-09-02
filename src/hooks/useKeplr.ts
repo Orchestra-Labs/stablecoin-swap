@@ -13,6 +13,7 @@ export function useKeplr() {
       return {
         isConnected: !!signer,
         walletAddress,
+        offlineSigner: signer,
       };
     },
   });

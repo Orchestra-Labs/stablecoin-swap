@@ -3,10 +3,9 @@ import { useEffect, useState } from 'react';
 import waves2 from '@/assets/images/waves-test.svg';
 import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
-import { rpcUrl } from '@/constants';
-import { useChain } from '@cosmos-kit/react';
 import { defaultChainName } from '@/constants';
-import { useTest } from '@/hooks/useTest';
+import { useChain } from '@cosmos-kit/react';
+import { useSwapTx } from '@/hooks/useSwapTx';
 
 export const SwapSection = () => {
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
@@ -20,16 +19,14 @@ export const SwapSection = () => {
   const { data: walletAssetsData } = useWalletAssets();
   const walletAssets = walletAssetsData || []; // Ensure it's always an array
 
-  const { error } = useTest();
-
-  console.log('error', error);
-
   const {
     connect,
     closeView,
     isWalletConnected,
     address: sendAddress,
   } = useChain(defaultChainName);
+
+  const { swapTx } = useSwapTx(defaultChainName);
 
   useEffect(() => {
     async function connectWallet() {
@@ -98,36 +95,12 @@ export const SwapSection = () => {
       return;
     }
 
-    try {
-      const swapRequestBody = {
-        trader: sendAddress,
-        offer_coin: `${noteAmount}${selectedSendAsset}`, // example: "1000000uluna"
-        ask_denom: selectedReceiveAsset,
-      };
-
-      const response = await fetch(`${rpcUrl}/symphony/market/v1beta1/swap`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(swapRequestBody),
-      });
-
-      const responseData = await response.json();
-      console.log('Swap response:', responseData);
-
-      // Assuming the response contains a field 'return_coin' for the swapped amount
-      if (response.ok) {
-        setReceiveAmount(responseData.return_coin.amount);
-      } else {
-        setErrorMessage(
-          `Swap failed: ${responseData.error || 'Unknown error'}`,
-        );
-      }
-    } catch (error) {
-      console.error('Error performing swap:', error);
-      setErrorMessage('An error occurred while trying to perform the swap.');
-    }
+    await swapTx(
+      sendAddress!,
+      sendAddress!,
+      { denom: selectedSendAsset, amount: noteAmount },
+      selectedReceiveAsset,
+    );
   };
 
   return (

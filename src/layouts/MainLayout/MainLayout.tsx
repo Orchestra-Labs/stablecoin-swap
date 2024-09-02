@@ -2,6 +2,7 @@ import { ComponentType, FC } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import { Footer, Header } from '@/components';
+import { Toaster } from '@/components/Toast/toaster.tsx';
 
 const MainLayout: FC = () => {
   return (
@@ -10,6 +11,7 @@ const MainLayout: FC = () => {
       <main className="w-full flex-1">
         <Outlet />
       </main>
+      <Toaster />
       <Footer />
     </div>
   );
