@@ -12,6 +12,7 @@ import { chainEndpoint, defaultChainName } from '@/constants';
 import { wallets } from '@cosmos-kit/keplr';
 import { ChainProvider } from '@cosmos-kit/react';
 import { SignerOptions } from 'cosmos-kit';
+import { getSigningCosmosClientOptions } from '@orchestra_labs/symphonyjs';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,7 +23,17 @@ const queryClient = new QueryClient({
   },
 });
 
-const signerOptions: SignerOptions = {};
+const signerOptions: SignerOptions = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  signingStargate: (_: unknown) => {
+    return getSigningCosmosClientOptions();
+  },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  preferredSignType: (_: unknown) => {
+    // `preferredSignType` determines which signer is preferred for `getOfflineSigner` method. By default `amino`. It might affect the `OfflineSigner` used in `signingStargateClient` and `signingCosmwasmClient`. But if only one signer is provided, `getOfflineSigner` will always return this signer, `preferredSignType` won't affect anything.
+    return 'amino';
+  },
+};
 
 export default function App() {
   return (
@@ -31,6 +42,7 @@ export default function App() {
       assetLists={assets} // supported asset lists
       wallets={wallets} // supported wallets,
       signerOptions={signerOptions}
+      logLevel="INFO"
       endpointOptions={{
         isLazy: true,
         endpoints: {

@@ -1,8 +1,9 @@
+import { Coin } from '@cosmjs/amino';
+import { DeliverTxResponse, isDeliverTxSuccess } from '@cosmjs/stargate';
 import { useChain } from '@cosmos-kit/react';
 import { getSigningOsmosisClient, osmosis } from '@orchestra_labs/symphonyjs';
-import { Coin } from '@cosmjs/amino';
+
 import { useToast } from '@/hooks/useToast';
-import { DeliverTxResponse, isDeliverTxSuccess } from '@cosmjs/stargate';
 
 const { swapSend } = osmosis.market.v1beta1.MessageComposer.withTypeUrl;
 
@@ -11,7 +12,7 @@ export const useSwapTx = (chainName: string) => {
     address: signerAddress,
     isWalletConnected,
     getRpcEndpoint,
-    getOfflineSignerAmino,
+    getOfflineSignerDirect,
   } = useChain(chainName);
   const { toast } = useToast();
 
@@ -23,6 +24,7 @@ export const useSwapTx = (chainName: string) => {
   ) => {
     if (!fromAddress || !toAddress || !offerCoin || !askDenom) {
       toast({
+        variant: 'destructive',
         title: 'Swap Failed!',
         description: 'Please fill in all the required fields',
       });
@@ -32,6 +34,7 @@ export const useSwapTx = (chainName: string) => {
 
     if (!isWalletConnected || !signerAddress) {
       toast({
+        variant: 'destructive',
         title: 'Swap Failed!',
         description: 'Please connect a wallet',
       });
@@ -41,7 +44,7 @@ export const useSwapTx = (chainName: string) => {
     try {
       const client = await getSigningOsmosisClient({
         rpcEndpoint: await getRpcEndpoint(),
-        signer: getOfflineSignerAmino(),
+        signer: getOfflineSignerDirect(),
       });
 
       const swapMsg = swapSend({
@@ -72,6 +75,7 @@ export const useSwapTx = (chainName: string) => {
             });
           } else {
             toast({
+              variant: 'destructive',
               title: 'Swap Failed!',
               description: `Transaction ${response.transactionHash} failed to be included in the block, error: ${response.rawLog}`,
             });
@@ -80,6 +84,7 @@ export const useSwapTx = (chainName: string) => {
     } catch (error) {
       if (error instanceof Error) {
         toast({
+          variant: 'destructive',
           title: 'Swap Failed!',
           description: error.message ?? 'An unexpected error has occured',
         });
