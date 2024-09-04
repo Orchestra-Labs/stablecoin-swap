@@ -1,9 +1,8 @@
+import { useChain } from '@cosmos-kit/react';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { defaultChainName, rpcUrl } from '@/constants';
-import { useChain } from '@cosmos-kit/react';
-import { Asset } from '@/sections';
 
 // Function to resolve IBC denom
 const resolveIbcDenom = async (ibcDenom: string): Promise<string> => {
@@ -25,27 +24,25 @@ const resolveIbcDenom = async (ibcDenom: string): Promise<string> => {
 };
 
 export function useWalletAssets() {
-  const { address: walletAddress, isWalletConnected } =
-    useChain(defaultChainName);
+  const {
+    address: walletAddress,
+    isWalletConnected,
+    getStargateClient,
+  } = useChain(defaultChainName);
   const assetsQuery = useQuery({
     queryKey: ['walletAssets', walletAddress],
     enabled: isWalletConnected,
     queryFn: async () => {
-      const response = await fetch(
-        `${rpcUrl}/cosmos/bank/v1beta1/spendable_balances/${walletAddress}`,
-      );
-      const data = await response.json();
-
-      // Extract assets from the balances
-      const assets: Asset[] = data.balances.map(
-        (balance: { denom: string; amount: string }) => ({
-          denom: balance.denom,
-          amount: balance.amount,
-          isIbc: balance.denom.startsWith('ibc/'),
-        }),
-      );
-
-      return assets;
+      if (!walletAddress) throw new Error('Wallet address is required');
+      const client = await getStargateClient();
+      const coins = await client.getAllBalances(walletAddress);
+      return coins.map(coin => {
+        return {
+          denom: coin.denom,
+          amount: coin.amount,
+          isIbc: coin.denom.startsWith('ibc/'),
+        };
+      });
     },
   });
 
