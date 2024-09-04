@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useChain } from '@cosmos-kit/react';
+import { useState } from 'react';
 
 import waves2 from '@/assets/images/waves-test.svg';
-import { useOracleAssets } from '@/hooks/useOracleAssets';
-import { useWalletAssets } from '@/hooks/useWalletAssets';
 import { defaultChainName } from '@/constants';
-import { useChain } from '@cosmos-kit/react';
+import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useSwapTx } from '@/hooks/useSwapTx';
+import { useWalletAssets } from '@/hooks/useWalletAssets';
 
 export const SwapSection = () => {
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
@@ -19,23 +19,9 @@ export const SwapSection = () => {
   const { data: walletAssetsData } = useWalletAssets();
   const walletAssets = walletAssetsData || []; // Ensure it's always an array
 
-  const {
-    connect,
-    closeView,
-    isWalletConnected,
-    address: sendAddress,
-  } = useChain(defaultChainName);
+  const { address: sendAddress } = useChain(defaultChainName);
 
   const { swapTx } = useSwapTx(defaultChainName);
-
-  useEffect(() => {
-    async function connectWallet() {
-      if (isWalletConnected) return;
-      await connect();
-    }
-
-    connectWallet().catch(console.error);
-  }, [closeView, connect, isWalletConnected]);
 
   const handleNoteAmountChange = (
     event: React.ChangeEvent<HTMLInputElement>,

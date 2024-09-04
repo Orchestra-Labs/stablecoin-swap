@@ -8,18 +8,18 @@ export default defineConfig({
   server: {
     open: true,
     host: true,
-    proxy: {
-      '/api': {
-        target: 'https://symphony-api.kleomedes.network',
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, ''),
-      },
-      '/rpc': {
-        target: 'https://symphony-rpc.kleomedes.network',
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/rpc/, ''),
-      },
-    },
+    // proxy: {
+    //   '/api': {
+    //     target: 'https://symphony-api.kleomedes.network',
+    //     changeOrigin: true,
+    //     rewrite: path => path.replace(/^\/api/, ''),
+    //   },
+    //   '/rpc': {
+    //     target: 'https://symphony-rpc.kleomedes.network',
+    //     changeOrigin: true,
+    //     rewrite: path => path.replace(/^\/rpc/, ''),
+    //   },
+    // },
   },
   preview: {
     open: false,

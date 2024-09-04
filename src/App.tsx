@@ -1,18 +1,19 @@
+import '@interchain-ui/react/styles';
+
+import { wallets } from '@cosmos-kit/keplr';
+import { ChainProvider } from '@cosmos-kit/react';
+import { getSigningCosmosClientOptions } from '@orchestra_labs/symphonyjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { assets, chains } from 'chain-registry/testnet';
+import { SignerOptions } from 'cosmos-kit';
 import { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
 
 import { Loader, ScrollToTop } from '@/components';
+import { defaultChainName } from '@/constants';
 
 import { AppRouter } from './app/Router';
-import '@interchain-ui/react/styles';
-import { assets, chains } from 'chain-registry/testnet';
-import { chainEndpoint, defaultChainName } from '@/constants';
-import { wallets } from '@cosmos-kit/keplr';
-import { ChainProvider } from '@cosmos-kit/react';
-import { SignerOptions } from 'cosmos-kit';
-import { getSigningCosmosClientOptions } from '@orchestra_labs/symphonyjs';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,7 +32,7 @@ const signerOptions: SignerOptions = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   preferredSignType: (_: unknown) => {
     // `preferredSignType` determines which signer is preferred for `getOfflineSigner` method. By default `amino`. It might affect the `OfflineSigner` used in `signingStargateClient` and `signingCosmwasmClient`. But if only one signer is provided, `getOfflineSigner` will always return this signer, `preferredSignType` won't affect anything.
-    return 'amino';
+    return 'direct';
   },
 };
 
@@ -42,16 +43,6 @@ export default function App() {
       assetLists={assets} // supported asset lists
       wallets={wallets} // supported wallets,
       signerOptions={signerOptions}
-      logLevel="INFO"
-      endpointOptions={{
-        isLazy: true,
-        endpoints: {
-          symphonytestnet: {
-            rpc: chainEndpoint.symphonytestnet.rpc,
-            rest: chainEndpoint.symphonytestnet.rest,
-          },
-        },
-      }}
     >
       <QueryClientProvider client={queryClient}>
         <RecoilRoot>
