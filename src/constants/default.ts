@@ -1,5 +1,4 @@
-// export const rpcUrl = 'https://symphony-api.kleomedes.network';
-export const rpcUrl = '/api';
+export const rpcUrl = 'https://symphony-api.kleomedes.network';
 export const defaultChainName = 'symphonytestnet';
 export const chainEndpoint = {
   symphonytestnet: {
