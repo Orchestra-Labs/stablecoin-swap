@@ -4,6 +4,9 @@ import { useMemo } from 'react';
 
 import { defaultChainName, rpcUrl } from '@/constants';
 
+import { useChain } from '@cosmos-kit/react';
+import { Asset } from '@/sections';
+
 // Function to resolve IBC denom
 const resolveIbcDenom = async (ibcDenom: string): Promise<string> => {
   try {
