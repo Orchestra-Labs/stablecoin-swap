@@ -1,20 +1,19 @@
 import '@interchain-ui/react/styles';
 
+import { wallets } from '@cosmos-kit/keplr';
+import { ChainProvider } from '@cosmos-kit/react';
 import { getSigningCosmosClientOptions } from '@orchestra_labs/symphonyjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { assets, chains } from 'chain-registry/testnet';
+import { SignerOptions } from 'cosmos-kit';
 import { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
 
 import { Loader, ScrollToTop } from '@/components';
+import { defaultChainName } from '@/constants';
 
 import { AppRouter } from './app/Router';
-import '@interchain-ui/react/styles';
-import { assets, chains } from 'chain-registry/testnet';
-import { defaultChainName } from '@/constants';
-import { wallets } from '@cosmos-kit/keplr';
-import { ChainProvider } from '@cosmos-kit/react';
-import { SignerOptions } from 'cosmos-kit';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,7 +23,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
 
 const signerOptions: SignerOptions = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
