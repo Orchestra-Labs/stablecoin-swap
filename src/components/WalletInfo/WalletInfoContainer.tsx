@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useChain } from "@cosmos-kit/react";
 import { defaultChainName } from "@/constants";
 import { Table, TableBody, TableCell, TableRow } from "@/components/Table";
+import { Button } from "@/components/Button";
+import { Clipboard } from "lucide-react";
 
 const AssetRow = (asset: {
     denom: string;
@@ -18,14 +20,19 @@ const AssetRow = (asset: {
 
 
 export const WalletInfoContainer = () => {
-    const { username } = useChain(defaultChainName);
+    const { username, address } = useChain(defaultChainName);
     const { data: assets } = useWalletAssets();
     
     return (
         <Card className="w-[350px]">
             <CardHeader>
                 <CardTitle>Wallet {username}</CardTitle>
-                <CardDescription>Your wallet</CardDescription>
+                <CardDescription>
+                    <span>{address}</span>
+                    <Button variant="ghost" size="icon">
+                        <Clipboard className="h-1 w-1" />
+                    </Button>
+                </CardDescription>
             </CardHeader>
             <CardContent>
                 <Table className="border">
