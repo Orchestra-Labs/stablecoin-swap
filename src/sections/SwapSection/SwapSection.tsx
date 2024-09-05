@@ -8,6 +8,7 @@ import { defaultChainName } from '@/constants';
 import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useSwapTx } from '@/hooks/useSwapTx';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
+import { WalletInfoContainer } from '@/components/WalletInfo/WalletInfoContainer';
 
 
 export const SwapSection = () => {
@@ -100,6 +101,8 @@ export const SwapSection = () => {
           <h1 className="font-semibold text-white text-h4 md:text-h2/[56px] xl:text-display2 mt-12">
             Discover truly decentralized real-world assets
           </h1>
+
+          <WalletInfoContainer />
 
           <div className="min-h-[24px]">
             <p className="text-error">{errorMessage}</p>{' '}
