@@ -28,7 +28,7 @@ export const WalletInfoContainer = () => {
                 <CardDescription>Your wallet</CardDescription>
             </CardHeader>
             <CardContent>
-                <Table>
+                <Table className="border">
                     <TableBody>
                         {assets.map(asset => {
                             return AssetRow(asset);
