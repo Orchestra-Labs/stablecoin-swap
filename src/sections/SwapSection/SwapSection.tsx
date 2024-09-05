@@ -4,18 +4,10 @@ import { useState } from 'react';
 import waves2 from '@/assets/images/waves-test.svg';
 import { defaultChainName } from '@/constants';
 
-import { useEffect, useState } from 'react';
-
-import waves2 from '@/assets/images/waves-test.svg';
 
 import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useSwapTx } from '@/hooks/useSwapTx';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
-
-import { rpcUrl } from '@/constants';
-import { useChain } from '@cosmos-kit/react';
-import { defaultChainName } from '@/constants';
-import { useTest } from '@/hooks/useTest';
 
 
 export const SwapSection = () => {
