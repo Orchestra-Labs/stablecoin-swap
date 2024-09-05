@@ -2,7 +2,7 @@ import { useChain } from '@cosmos-kit/react';
 import { useState } from 'react';
 
 import waves2 from '@/assets/images/waves-test.svg';
-import { WalletInfoContainer } from '@/components/WalletInfo/WalletInfoContainer.tsx';
+import { WalletInfoContainer } from '@/components/WalletInfo';
 import { defaultChainName } from '@/constants';
 import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useSwapTx } from '@/hooks/useSwapTx';
