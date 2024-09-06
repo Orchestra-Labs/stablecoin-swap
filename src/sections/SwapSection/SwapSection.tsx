@@ -17,8 +17,8 @@ export const SwapSection = () => {
 
   const { assets } = useOracleAssets();
 
-  const { data: walletAssetsData } = useWalletAssets();
-  const walletAssets = walletAssetsData || []; // Ensure it's always an array
+  const { data, refetch } = useWalletAssets();
+  const walletAssets = data?.assets ?? []; // Ensure it's always an array
 
   const { address: sendAddress } = useChain(defaultChainName);
 
@@ -88,6 +88,8 @@ export const SwapSection = () => {
       { denom: selectedSendAsset, amount: noteAmount },
       selectedReceiveAsset,
     );
+
+    refetch();
   };
 
   return (

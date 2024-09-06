@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { defaultChainName, rpcUrl } from '@/constants';
-import { useAsset } from './useAsset';
 
+import { useAsset } from './useAsset';
 
 // Function to resolve IBC denom
 const resolveIbcDenom = async (ibcDenom: string): Promise<string> => {
@@ -28,7 +28,6 @@ const resolveIbcDenom = async (ibcDenom: string): Promise<string> => {
 export function useWalletAssets() {
   const {
     address: walletAddress,
-    assets,
     isWalletConnected,
     getStargateClient,
   } = useChain(defaultChainName);
@@ -46,7 +45,7 @@ export function useWalletAssets() {
           denom: coin.denom,
           amount: coin.amount,
           isIbc: coin.denom.startsWith('ibc/'),
-          logo: registryAsset?.logo_URIs?.png ?? registryAsset?.logo_URIs?.jpeg
+          logo: registryAsset?.logo_URIs?.png ?? registryAsset?.logo_URIs?.jpeg,
         };
       });
     },
@@ -71,14 +70,48 @@ export function useWalletAssets() {
     },
   });
 
-  const resolvedAssets = useMemo(
-    () => resolvedAddressesQuery.data,
-    [resolvedAddressesQuery.data],
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allQueries = {
+    assets: assetsQuery,
+    resolvedAddresses: resolvedAddressesQuery,
+  };
+
+  const updatableQueriesAfterMutation = [assetsQuery, resolvedAddressesQuery];
+
+  const isInitialFetching = Object.values(allQueries).some(
+    ({ isLoading }) => isLoading,
   );
 
+  const isDoingRefetching = Object.values(allQueries).some(
+    ({ isRefetching }) => isRefetching,
+  );
+
+  const isLoading = isInitialFetching || isDoingRefetching;
+
+  type AllQueries = typeof allQueries;
+
+  type QueriesData = {
+    [Key in keyof AllQueries]: NonNullable<AllQueries[Key]['data']>;
+  };
+
+  const data = useMemo(() => {
+    if (isLoading) return;
+
+    // eslint-disable-next-line consistent-return
+    return Object.fromEntries(
+      Object.entries(allQueries).map(([key, query]) => [key, query.data]),
+    ) as QueriesData;
+  }, [allQueries, isLoading]);
+
+  const refetch = () => {
+    console.log('refresh wallet');
+    updatableQueriesAfterMutation.forEach(query => query.refetch());
+  };
+
   return {
-    isLoading: assetsQuery.isLoading || resolvedAddressesQuery.isLoading,
+    isLoading,
     error: assetsQuery.error || resolvedAddressesQuery.error,
-    data: resolvedAssets ?? [],
+    data,
+    refetch,
   };
 }

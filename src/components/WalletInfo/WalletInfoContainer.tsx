@@ -11,14 +11,19 @@ import { Table, TableBody, TableCell, TableRow } from '@/components/Table';
 import { defaultChainName } from '@/constants';
 import { useToast, useWalletAssets } from '@/hooks';
 
-const AssetRow = (asset: { denom: string; amount: string; isIbc: boolean, logo?: string }) => {
+const AssetRow = (asset: {
+  denom: string;
+  amount: string;
+  isIbc: boolean;
+  logo?: string;
+}) => {
   const { denom, amount, isIbc, logo } = asset;
   const amountNumber = parseInt(amount, 10);
   return (
     <TableRow key={denom}>
-        <TableCell>
-            <img className='w-4 h-4' src={logo} />
-        </TableCell>
+      <TableCell>
+        <img alt={`logo_${denom}`} className="w-4 h-4" src={logo} />
+      </TableCell>
       <TableCell className="font-medium">{denom}</TableCell>
       <TableCell>
         {amountNumber.toLocaleString('en-US', {
@@ -32,8 +37,10 @@ const AssetRow = (asset: { denom: string; amount: string; isIbc: boolean, logo?:
 
 export const WalletInfoContainer = () => {
   const { username, address } = useChain(defaultChainName);
-  const { data: assets } = useWalletAssets();
+  const { data } = useWalletAssets();
   const { toast } = useToast();
+
+  const assets = data?.resolvedAddresses || [];
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(address!);
