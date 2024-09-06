@@ -12,7 +12,8 @@ export function useOracleAssets() {
         `${rpcUrl}/osmosis/oracle/v1beta1/denoms/exchange_rates`,
       );
       const data = await response.json();
-      const assetsWithNative = [data.exchange_rates,
+      const assetsWithNative = [
+        ...data.exchange_rates,
         {
           denom: "note",
           amount: "1.0"
