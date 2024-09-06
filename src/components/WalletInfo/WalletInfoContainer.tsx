@@ -11,11 +11,14 @@ import { Table, TableBody, TableCell, TableRow } from '@/components/Table';
 import { defaultChainName } from '@/constants';
 import { useToast, useWalletAssets } from '@/hooks';
 
-const AssetRow = (asset: { denom: string; amount: string; isIbc: boolean }) => {
-  const { denom, amount, isIbc } = asset;
+const AssetRow = (asset: { denom: string; amount: string; isIbc: boolean, logo?: string }) => {
+  const { denom, amount, isIbc, logo } = asset;
   const amountNumber = parseInt(amount, 10);
   return (
-    <TableRow>
+    <TableRow key={denom}>
+        <TableCell>
+            <img className='w-4 h-4' src={logo} />
+        </TableCell>
       <TableCell className="font-medium">{denom}</TableCell>
       <TableCell>
         {amountNumber.toLocaleString('en-US', {
@@ -48,7 +51,7 @@ export const WalletInfoContainer = () => {
           className="hover:bg-blue-hover hover:cursor-pointer p-2 rounded-md"
           onClick={copyToClipboard}
         >
-          <div>{address}</div>
+          {address}
         </CardDescription>
       </CardHeader>
       <CardContent>

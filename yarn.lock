@@ -367,6 +367,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@chain-registry/types@npm:^0.45.65":
+  version: 0.45.65
+  resolution: "@chain-registry/types@npm:0.45.65"
+  checksum: 10c0/8960912db9ac28892aad20bc389f36844b899c1740a44bfafb6f87d84f94a42911b0f17b31bc1290994d699827e2db054625a84f34eed25ea1d3e35cb94b735c
+  languageName: node
+  linkType: hard
+
 "@chain-registry/utils@npm:^1.46.1, @chain-registry/utils@npm:^1.46.57":
   version: 1.46.57
   resolution: "@chain-registry/utils@npm:1.46.57"
@@ -12076,6 +12083,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "symphony-markup@workspace:."
   dependencies:
+    "@chain-registry/types": "npm:^0.45.65"
     "@cosmjs/amino": "npm:^0.32.4"
     "@cosmjs/launchpad": "npm:^0.27.1"
     "@cosmjs/proto-signing": "npm:^0.32.4"

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { defaultChainName, rpcUrl } from '@/constants';
+import { useAsset } from './useAsset';
 
 
 // Function to resolve IBC denom
@@ -27,9 +28,11 @@ const resolveIbcDenom = async (ibcDenom: string): Promise<string> => {
 export function useWalletAssets() {
   const {
     address: walletAddress,
+    assets,
     isWalletConnected,
     getStargateClient,
   } = useChain(defaultChainName);
+  const { find } = useAsset(defaultChainName);
   const assetsQuery = useQuery({
     queryKey: ['walletAssets', walletAddress],
     enabled: isWalletConnected,
@@ -38,10 +41,12 @@ export function useWalletAssets() {
       const client = await getStargateClient();
       const coins = await client.getAllBalances(walletAddress);
       return coins.map(coin => {
+        const registryAsset = find(coin.denom);
         return {
           denom: coin.denom,
           amount: coin.amount,
           isIbc: coin.denom.startsWith('ibc/'),
+          logo: registryAsset?.logo_URIs?.png ?? registryAsset?.logo_URIs?.jpeg
         };
       });
     },
