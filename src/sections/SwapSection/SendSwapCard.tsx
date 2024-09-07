@@ -1,8 +1,8 @@
-import { useAtom } from 'jotai/react/useAtom';
-import { useAtomValue } from 'jotai/react/useAtomValue';
-import { useSetAtom } from 'jotai/react/useSetAtom';
+import { useChain } from '@cosmos-kit/react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 import { SwapCard } from '@/components/Swap';
+import { defaultChainName } from '@/constants';
 import { SendAmountAtom } from '@/sections/SwapSection/atoms/SendAmountAtom';
 import { SendAssetAtom } from '@/sections/SwapSection/atoms/SendAssetAtom';
 import { WalletAssetsAtom } from '@/sections/SwapSection/atoms/WalletAssetsAtom';
@@ -12,13 +12,15 @@ export const SendSwapCard = () => {
   const [sendAmount, setSendAmount] = useAtom(SendAmountAtom);
 
   const walletAssets = useAtomValue(WalletAssetsAtom);
+  const { address } = useChain(defaultChainName);
 
   const onAmountValueChange = (value: number) => {
-    setSendAmount(value || 0);
+    setSendAmount(value ?? 0);
   };
 
   const onAssetValueChange = (value: string) => {
-    setSendAsset(value || '');
+    console.log('send asset value', value);
+    setSendAsset(value);
   };
 
   return (
@@ -32,6 +34,8 @@ export const SendSwapCard = () => {
       amountValue={sendAmount}
       onAssetValueChange={onAssetValueChange}
       onAmountValueChange={onAmountValueChange}
+      address={address ?? ''}
+      addressInputEnabled={false}
     />
   );
 };

@@ -1,3 +1,3 @@
-import { atom } from 'jotai/vanilla/atom';
+import { atom } from 'jotai';
 
-export const SendAssetAtom = atom('');
+export const SendAssetAtom = atom('note');

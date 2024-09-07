@@ -1,5 +1,5 @@
 import { useChain } from '@cosmos-kit/react';
-import { Provider } from 'jotai/react/Provider';
+import { Provider } from 'jotai';
 import { Wallet } from 'lucide-react';
 
 import { Button } from '@/components/Button/button';

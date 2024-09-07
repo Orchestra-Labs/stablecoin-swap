@@ -1,19 +1,20 @@
-import { useAtom } from 'jotai/react/useAtom';
-import { useSetAtom } from 'jotai/react/useSetAtom';
+import { useChain } from '@cosmos-kit/react';
+import { useSetAtom } from 'jotai';
 
 import { SwapCard } from '@/components/Swap';
+import { defaultChainName } from '@/constants';
 import { useOracleAssets } from '@/hooks';
-import { ReceiveAmountAtom } from '@/sections/SwapSection/atoms/ReceiveAmountAtom';
+import { useReceiveAmount } from '@/sections';
 import { ReceiveAssetAtom } from '@/sections/SwapSection/atoms/ReceiveAssetAtom';
 
 export const ReceiveSwapCard = () => {
   const setReceiveAsset = useSetAtom(ReceiveAssetAtom);
-  const [receiveAmount, setReceiveAmount] = useAtom(ReceiveAmountAtom);
+  const { receiveAmount } = useReceiveAmount();
   const { assets } = useOracleAssets();
 
-  const onAmountValueChange = (value: number) => {
-    setReceiveAmount(value || 0);
-  };
+  const { address } = useChain(defaultChainName);
+
+  const onAmountValueChange = (_: number) => {};
 
   const onAssetValueChange = (value: string) => {
     setReceiveAsset(value || '');
@@ -27,6 +28,8 @@ export const ReceiveSwapCard = () => {
       amountValue={receiveAmount}
       onAssetValueChange={onAssetValueChange}
       onAmountValueChange={onAmountValueChange}
+      amountInputEnabled={false}
+      address={address ?? ''}
     />
   );
 };

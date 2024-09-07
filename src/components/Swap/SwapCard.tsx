@@ -18,6 +18,9 @@ export type SwapCardProps = {
   amountValue: number;
   onAssetValueChange: (value: string) => void;
   onAmountValueChange: (value: number) => void;
+  address: string;
+  amountInputEnabled?: boolean;
+  addressInputEnabled?: boolean;
 };
 
 const Option = (props: { value: string; label: string }) => {
@@ -39,6 +42,9 @@ export const SwapCard = (props: SwapCardProps) => {
     amountValue,
     onAssetValueChange,
     onAmountValueChange,
+    address,
+    amountInputEnabled = true,
+    addressInputEnabled = true,
   } = props;
   return (
     <Card className="w-[380px] bg-black backdrop-blur-xl">
@@ -65,12 +71,21 @@ export const SwapCard = (props: SwapCardProps) => {
           </SelectContent>
         </Select>
         <Input
+          lang="en"
+          step="1"
+          className="bg-black backdrop-blur-xl"
           type="number"
-          placeholder="Amount to send"
+          placeholder="amount"
           value={amountValue}
+          disabled={!amountInputEnabled}
           onChange={(event: ChangeEvent<HTMLInputElement>) =>
             onAmountValueChange(parseFloat(event.target.value ?? '0'))
           }
+        />
+        <Input
+          className="bg-black backdrop-blur-xl"
+          value={address}
+          disabled={!addressInputEnabled}
         />
       </CardContent>
     </Card>

@@ -1,7 +1,12 @@
-export function calculateReceiveAmount(amount: string, rate: string): number {
+import BigNumber from 'bignumber.js';
+
+export function calculateReceiveAmount(
+  amount: number,
+  rate: BigNumber,
+): BigNumber {
   if (!rate || !amount) {
-    return 0;
+    return BigNumber(0);
   }
 
-  return parseFloat(amount) * parseFloat(rate);
+  return BigNumber(amount).multipliedBy(rate);
 }

@@ -1,5 +1,5 @@
 import { useChain } from '@cosmos-kit/react';
-import { useAtom } from 'jotai/react/useAtom';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState } from 'react';
 
 import waves2 from '@/assets/images/waves-test.svg';
@@ -8,15 +8,18 @@ import { defaultChainName } from '@/constants';
 import { useSwapTx } from '@/hooks/useSwapTx';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
 import { ReceiveAssetAtom } from '@/sections/SwapSection/atoms/ReceiveAssetAtom';
+import { SendAmountAtom } from '@/sections/SwapSection/atoms/SendAmountAtom';
 import { SendAssetAtom } from '@/sections/SwapSection/atoms/SendAssetAtom';
 import { WalletAssetsAtom } from '@/sections/SwapSection/atoms/WalletAssetsAtom';
 import { ReceiveSwapCard } from '@/sections/SwapSection/ReceiveSwapCard';
+import { SendSwapCard } from '@/sections/SwapSection/SendSwapCard';
 
 export const SwapSection = () => {
   const [selectedSendAsset] = useAtom(SendAssetAtom);
   const [selectedReceiveAsset] = useAtom(ReceiveAssetAtom);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [walletAssets, setWalletAssets] = useAtom(WalletAssetsAtom);
+  const sendAmount = useAtomValue(SendAmountAtom);
+  const [errorMessage, _] = useState('');
+  const setWalletAssets = useSetAtom(WalletAssetsAtom);
 
   const { data, refetch } = useWalletAssets();
   setWalletAssets(data?.assets ?? []); // Ensure it's always an array
@@ -25,56 +28,8 @@ export const SwapSection = () => {
 
   const { swapTx } = useSwapTx(defaultChainName);
 
-  const handleNoteAmountChange = (value: number) => {
-    setNoteAmount(value || 0); // Ensure value is never undefined
-    calculateReceiveAmount(value, selectedReceiveAsset);
-  };
-
-  const handleSendAssetChange = (value: string) => {
-    const selectedAsset = value || '';
-    setSelectedSendAsset(selectedAsset);
-
-    const asset = walletAssets.find(a => a.denom === selectedAsset);
-    if (asset?.isIbc) {
-      setErrorMessage('Invalid Asset: Cannot swap IBC tokens.');
-      setReceiveAmount(''); // Clear the receive amount if there's an error
-    } else {
-      setErrorMessage('');
-      calculateReceiveAmount(noteAmount, selectedReceiveAsset);
-    }
-  };
-
-  const handleReceiveAssetChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const selectedAsset = event.target.value || '';
-    setSelectedReceiveAsset(selectedAsset);
-    calculateReceiveAmount(noteAmount, selectedAsset);
-  };
-
-  const calculateReceiveAmount = (noteAmount: number, receiveAsset: string) => {
-    if (!receiveAsset || !noteAmount) {
-      setReceiveAmount('');
-      return '';
-    }
-
-    const exchangeRate =
-      assets.find(a => a.denom === receiveAsset)?.amount || '0';
-    if (!exchangeRate) {
-      setReceiveAmount('');
-      return '';
-    }
-
-    const amount = (parseFloat(noteAmount) / parseFloat(exchangeRate)).toFixed(
-      6,
-    );
-
-    setReceiveAmount(amount);
-    return amount;
-  };
-
   const performSwap = async () => {
-    if (!selectedReceiveAsset || !noteAmount || !selectedSendAsset) {
+    if (!selectedReceiveAsset || !sendAmount || !selectedSendAsset) {
       alert('Please enter NOTE amount and select both send and receive assets');
       return;
     }
@@ -82,7 +37,7 @@ export const SwapSection = () => {
     await swapTx(
       sendAddress!,
       sendAddress!,
-      { denom: selectedSendAsset, amount: noteAmount },
+      { denom: selectedSendAsset, amount: sendAmount.toFixed(0) },
       selectedReceiveAsset,
     );
 
@@ -105,36 +60,7 @@ export const SwapSection = () => {
           </div>
 
           <div className="flex justify-between items-center w-full gap-8">
-            {/* Swap Box 1 */}
-            {/* <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2"> */}
-            {/*  <h3 className="text-white mb-2">Send</h3> */}
-            {/*  <select */}
-            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
-            {/*    value={selectedSendAsset} */}
-            {/*    onChange={handleSendAssetChange} */}
-            {/*  > */}
-            {/*    <option value="">Select send asset</option> */}
-            {/*    {walletAssets.map(asset => ( */}
-            {/*      <option key={asset.denom} value={asset.denom}> */}
-            {/*        {asset.denom} */}
-            {/*      </option> */}
-            {/*    ))} */}
-            {/*  </select> */}
-            {/*  <input */}
-            {/*    type="number" */}
-            {/*    placeholder="Amount of NOTE" */}
-            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
-            {/*    value={noteAmount} */}
-            {/*    onChange={handleNoteAmountChange} */}
-            {/*  /> */}
-            {/*  <input */}
-            {/*    type="text" */}
-            {/*    readOnly */}
-            {/*    placeholder="Wallet Address" */}
-            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
-            {/*    value={sendAddress} */}
-            {/*  /> */}
-            {/* </div> */}
+            <SendSwapCard />
 
             <div className="flex flex-col items-center justify-center gap-4">
               {/* Swap Button */}
