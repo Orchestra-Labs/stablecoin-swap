@@ -1,4 +1,5 @@
 import { useChain } from '@cosmos-kit/react';
+import { CircleDollarSign } from 'lucide-react';
 
 import {
   Card,
@@ -22,7 +23,11 @@ const AssetRow = (asset: {
   return (
     <TableRow key={denom}>
       <TableCell>
-        <img alt={`logo_${denom}`} className="w-4 h-4" src={logo} />
+        {logo ? (
+          <img alt={`logo_${denom}`} className="w-4 h-4" src={logo} />
+        ) : (
+          <CircleDollarSign />
+        )}
       </TableCell>
       <TableCell className="font-medium">{denom}</TableCell>
       <TableCell>

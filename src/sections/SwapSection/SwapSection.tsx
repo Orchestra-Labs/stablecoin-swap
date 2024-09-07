@@ -1,40 +1,37 @@
 import { useChain } from '@cosmos-kit/react';
+import { useAtom } from 'jotai/react/useAtom';
 import { useState } from 'react';
 
 import waves2 from '@/assets/images/waves-test.svg';
 import { WalletInfoContainer } from '@/components/WalletInfo';
 import { defaultChainName } from '@/constants';
-import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useSwapTx } from '@/hooks/useSwapTx';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
+import { ReceiveAssetAtom } from '@/sections/SwapSection/atoms/ReceiveAssetAtom';
+import { SendAssetAtom } from '@/sections/SwapSection/atoms/SendAssetAtom';
+import { WalletAssetsAtom } from '@/sections/SwapSection/atoms/WalletAssetsAtom';
+import { ReceiveSwapCard } from '@/sections/SwapSection/ReceiveSwapCard';
 
 export const SwapSection = () => {
-  const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
-  const [selectedSendAsset, setSelectedSendAsset] = useState('');
+  const [selectedSendAsset] = useAtom(SendAssetAtom);
+  const [selectedReceiveAsset] = useAtom(ReceiveAssetAtom);
   const [errorMessage, setErrorMessage] = useState('');
-  const [receiveAmount, setReceiveAmount] = useState('');
-  const [noteAmount, setNoteAmount] = useState('');
-
-  const { assets } = useOracleAssets();
+  const [walletAssets, setWalletAssets] = useAtom(WalletAssetsAtom);
 
   const { data, refetch } = useWalletAssets();
-  const walletAssets = data?.assets ?? []; // Ensure it's always an array
+  setWalletAssets(data?.assets ?? []); // Ensure it's always an array
 
   const { address: sendAddress } = useChain(defaultChainName);
 
   const { swapTx } = useSwapTx(defaultChainName);
 
-  const handleNoteAmountChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setNoteAmount(event.target.value || ''); // Ensure value is never undefined
-    calculateReceiveAmount(event.target.value, selectedReceiveAsset);
+  const handleNoteAmountChange = (value: number) => {
+    setNoteAmount(value || 0); // Ensure value is never undefined
+    calculateReceiveAmount(value, selectedReceiveAsset);
   };
 
-  const handleSendAssetChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const selectedAsset = event.target.value || '';
+  const handleSendAssetChange = (value: string) => {
+    const selectedAsset = value || '';
     setSelectedSendAsset(selectedAsset);
 
     const asset = walletAssets.find(a => a.denom === selectedAsset);
@@ -55,7 +52,7 @@ export const SwapSection = () => {
     calculateReceiveAmount(noteAmount, selectedAsset);
   };
 
-  const calculateReceiveAmount = (noteAmount: string, receiveAsset: string) => {
+  const calculateReceiveAmount = (noteAmount: number, receiveAsset: string) => {
     if (!receiveAsset || !noteAmount) {
       setReceiveAmount('');
       return '';
@@ -109,35 +106,35 @@ export const SwapSection = () => {
 
           <div className="flex justify-between items-center w-full gap-8">
             {/* Swap Box 1 */}
-            <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2">
-              <h3 className="text-white mb-2">Send</h3>
-              <select
-                className="w-full mb-4 p-2 border rounded text-black"
-                value={selectedSendAsset}
-                onChange={handleSendAssetChange}
-              >
-                <option value="">Select send asset</option>
-                {walletAssets.map(asset => (
-                  <option key={asset.denom} value={asset.denom}>
-                    {asset.denom}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                placeholder="Amount of NOTE"
-                className="w-full mb-4 p-2 border rounded text-black"
-                value={noteAmount}
-                onChange={handleNoteAmountChange}
-              />
-              <input
-                type="text"
-                readOnly
-                placeholder="Wallet Address"
-                className="w-full mb-4 p-2 border rounded text-black"
-                value={sendAddress}
-              />
-            </div>
+            {/* <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2"> */}
+            {/*  <h3 className="text-white mb-2">Send</h3> */}
+            {/*  <select */}
+            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
+            {/*    value={selectedSendAsset} */}
+            {/*    onChange={handleSendAssetChange} */}
+            {/*  > */}
+            {/*    <option value="">Select send asset</option> */}
+            {/*    {walletAssets.map(asset => ( */}
+            {/*      <option key={asset.denom} value={asset.denom}> */}
+            {/*        {asset.denom} */}
+            {/*      </option> */}
+            {/*    ))} */}
+            {/*  </select> */}
+            {/*  <input */}
+            {/*    type="number" */}
+            {/*    placeholder="Amount of NOTE" */}
+            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
+            {/*    value={noteAmount} */}
+            {/*    onChange={handleNoteAmountChange} */}
+            {/*  /> */}
+            {/*  <input */}
+            {/*    type="text" */}
+            {/*    readOnly */}
+            {/*    placeholder="Wallet Address" */}
+            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
+            {/*    value={sendAddress} */}
+            {/*  /> */}
+            {/* </div> */}
 
             <div className="flex flex-col items-center justify-center gap-4">
               {/* Swap Button */}
@@ -150,43 +147,45 @@ export const SwapSection = () => {
               </button>
             </div>
 
+            <ReceiveSwapCard />
+
             {/* Swap Box 2 */}
-            <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2">
-              <h3 className="text-white mb-2">Receive</h3>
-              <select
-                className="w-full mb-4 p-2 border rounded text-black"
-                value={selectedReceiveAsset}
-                onChange={handleReceiveAssetChange}
-              >
-                <option value="">Select receive asset</option>
-                {assets.map(asset => (
-                  <option key={asset.denom} value={asset.denom}>
-                    {asset.denom}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                value={receiveAmount}
-                className="w-full mb-4 p-2 border rounded text-black"
-                readOnly
-                placeholder="Receive amount"
-              />
-              <input
-                type="text"
-                placeholder={sendAddress || 'Wallet Address'}
-                className="w-full mb-4 p-2 border rounded text-black"
-                id="receiveAddress"
-                readOnly
-              />
-              {selectedReceiveAsset && (
-                <p className="text-white">
-                  Exchange rate:{' '}
-                  {assets.find(a => a.denom === selectedReceiveAsset)?.amount}{' '}
-                  note per {selectedReceiveAsset}
-                </p>
-              )}
-            </div>
+            {/* <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2"> */}
+            {/*  <h3 className="text-white mb-2">Receive</h3> */}
+            {/*  <select */}
+            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
+            {/*    value={selectedReceiveAsset} */}
+            {/*    onChange={handleReceiveAssetChange} */}
+            {/*  > */}
+            {/*    <option value="">Select receive asset</option> */}
+            {/*    {assets.map(asset => ( */}
+            {/*      <option key={asset.denom} value={asset.denom}> */}
+            {/*        {asset.denom} */}
+            {/*      </option> */}
+            {/*    ))} */}
+            {/*  </select> */}
+            {/*  <input */}
+            {/*    type="text" */}
+            {/*    value={receiveAmount} */}
+            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
+            {/*    readOnly */}
+            {/*    placeholder="Receive amount" */}
+            {/*  /> */}
+            {/*  <input */}
+            {/*    type="text" */}
+            {/*    placeholder={sendAddress || 'Wallet Address'} */}
+            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
+            {/*    id="receiveAddress" */}
+            {/*    readOnly */}
+            {/*  /> */}
+            {/*  {selectedReceiveAsset && ( */}
+            {/*    <p className="text-white"> */}
+            {/*      Exchange rate:{' '} */}
+            {/*      {assets.find(a => a.denom === selectedReceiveAsset)?.amount}{' '} */}
+            {/*      note per {selectedReceiveAsset} */}
+            {/*    </p> */}
+            {/*  )} */}
+            {/* </div> */}
           </div>
         </div>
       </div>

@@ -8,7 +8,6 @@ import { assets, chains } from 'chain-registry/testnet';
 import { SignerOptions } from 'cosmos-kit';
 import { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { RecoilRoot } from 'recoil';
 
 import { Loader, ScrollToTop } from '@/components';
 import { defaultChainName } from '@/constants';
@@ -45,20 +44,18 @@ export default function App() {
       signerOptions={signerOptions}
     >
       <QueryClientProvider client={queryClient}>
-        <RecoilRoot>
-          <Suspense
-            fallback={
-              <div className="w-screen h-screen">
-                <Loader />
-              </div>
-            }
-          >
-            <BrowserRouter>
-              <ScrollToTop />
-              <AppRouter />
-            </BrowserRouter>
-          </Suspense>
-        </RecoilRoot>
+        <Suspense
+          fallback={
+            <div className="w-screen h-screen">
+              <Loader />
+            </div>
+          }
+        >
+          <BrowserRouter>
+            <ScrollToTop />
+            <AppRouter />
+          </BrowserRouter>
+        </Suspense>
       </QueryClientProvider>
     </ChainProvider>
   );
