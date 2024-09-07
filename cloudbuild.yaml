@@ -1,7 +1,21 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
 steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       ['build', '--no-cache', '-t', 'gcr.io/$PROJECT_ID/stablecoin-swap', '.']
   - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['app', 'deploy']
+    args:
+      [
+        'run',
+        'deploy',
+        'stablecoin-swap',
+        '--image',
+        'gcr.io/$PROJECT_ID/stablecoin-swap',
+        '--platform',
+        'managed',
+        '--region',
+        'us-east1',
+        '--allow-unauthenticated',
+      ]
 timeout: '1600s'
