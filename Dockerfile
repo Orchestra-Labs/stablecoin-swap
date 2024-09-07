@@ -3,8 +3,8 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-ENV PORT=4173
-EXPOSE 4173
+ENV PORT=8080
+EXPOSE 8080
 
 RUN yarn install
 RUN yarn build
