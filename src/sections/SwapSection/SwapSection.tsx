@@ -1,6 +1,5 @@
 import { useChain } from '@cosmos-kit/react';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useState } from 'react';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 import waves2 from '@/assets/images/waves-test.svg';
 import { WalletInfoContainer } from '@/components/WalletInfo';
@@ -8,6 +7,7 @@ import { defaultChainName } from '@/constants';
 import { useSwapTx } from '@/hooks/useSwapTx';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
 import {
+  ErrorMessageAtom,
   ReceiveAssetAtom,
   SendAmountAtom,
   SendAssetAtom,
@@ -17,10 +17,10 @@ import { ReceiveSwapCard } from '@/sections/SwapSection/ReceiveSwapCard';
 import { SendSwapCard } from '@/sections/SwapSection/SendSwapCard';
 
 export const SwapSection = () => {
-  const [selectedSendAsset] = useAtom(SendAssetAtom);
-  const [selectedReceiveAsset] = useAtom(ReceiveAssetAtom);
+  const selectedSendAsset = useAtomValue(SendAssetAtom);
+  const selectedReceiveAsset = useAtomValue(ReceiveAssetAtom);
   const sendAmount = useAtomValue(SendAmountAtom);
-  const [errorMessage, _] = useState('');
+  const errorMessage = useAtomValue(ErrorMessageAtom);
   const setWalletAssets = useSetAtom(WalletAssetsAtom);
 
   const { data, refetch } = useWalletAssets();

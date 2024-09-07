@@ -17,21 +17,24 @@ const AssetRow = (asset: {
   amount: string;
   isIbc: boolean;
   logo?: string;
+  symbol?: string;
+  exponent?: number;
 }) => {
-  const { denom, amount, isIbc, logo } = asset;
+  const { denom, amount, isIbc, logo, exponent, symbol } = asset;
   const amountNumber = parseInt(amount, 10);
+  const normalizedAmount = amountNumber / 10 ** (exponent ?? 0);
   return (
     <TableRow key={denom}>
       <TableCell>
         {logo ? (
-          <img alt={`logo_${denom}`} className="w-4 h-4" src={logo} />
+          <img alt={`logo_${denom}`} className="w-6 h-6" src={logo} />
         ) : (
-          <CircleDollarSign />
+          <CircleDollarSign className="h-6 w-6" />
         )}
       </TableCell>
-      <TableCell className="font-medium">{denom}</TableCell>
+      <TableCell className="font-medium">{symbol}</TableCell>
       <TableCell>
-        {amountNumber.toLocaleString('en-US', {
+        {normalizedAmount.toLocaleString('en-US', {
           maximumFractionDigits: 2,
         })}
       </TableCell>

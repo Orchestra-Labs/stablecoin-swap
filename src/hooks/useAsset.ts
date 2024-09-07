@@ -1,19 +1,19 @@
-import { useChain } from "@cosmos-kit/react";
-import { Asset, AssetDenomUnit } from "@chain-registry/types";
+import { Asset, AssetDenomUnit } from '@chain-registry/types';
+import { useChain } from '@cosmos-kit/react';
 
-const matchDenom = (denom: string, denomUnits: AssetDenomUnit[]) : boolean => {
-    return denomUnits.map(d => d.denom).some(x => x === denom);
+const matchDenom = (denom: string, denomUnits: AssetDenomUnit[]): boolean => {
+  return denomUnits.map(d => d.denom).some(x => x === denom);
 };
 
 export const useAsset = (chainName: string) => {
-    const { assets } = useChain(chainName);
+  const { assets } = useChain(chainName);
 
-    const find = (denom: string) => {
-        console.log("assets", assets);
-        const assetsList = assets?.assets ?? [];
+  const find = (denom: string): Asset | undefined => {
+    console.log('assets', assets);
+    const assetsList = assets?.assets ?? [];
 
-        return assetsList.find(asset => matchDenom(denom, asset.denom_units));
-    }
+    return assetsList.find(asset => matchDenom(denom, asset.denom_units));
+  };
 
-    return { find };
+  return { find };
 };

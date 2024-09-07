@@ -3,6 +3,8 @@ export interface Asset {
   amount: string;
   isIbc: boolean;
   logo?: string;
+  symbol?: string;
+  exponent?: number;
 }
 
 export interface WalletAssets {
