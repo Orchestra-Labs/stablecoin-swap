@@ -1,96 +1,94 @@
+import React, { useState, useEffect } from 'react';
 import { useChain } from '@cosmos-kit/react';
-import { useState } from 'react';
 
 import waves2 from '@/assets/images/waves-test.svg';
 import { defaultChainName } from '@/constants';
 
-
 import { useOracleAssets } from '@/hooks/useOracleAssets';
 import { useSwapTx } from '@/hooks/useSwapTx';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 
-
-export const SwapSection = () => {
+export const SwapSection: React.FC = () => {
   const [selectedReceiveAsset, setSelectedReceiveAsset] = useState('');
   const [selectedSendAsset, setSelectedSendAsset] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [receiveAmount, setReceiveAmount] = useState('');
-  const [noteAmount, setNoteAmount] = useState('');
+  const [sendAmount, setSendAmount] = useState('');
 
-  const { assets } = useOracleAssets();
-
-  const { data: walletAssetsData } = useWalletAssets();
-  const walletAssets = walletAssetsData || []; // Ensure it's always an array
-
+  const { assets, isLoading: isLoadingAssets } = useOracleAssets();
+  const { data: walletAssetsData, isLoading: isLoadingWalletAssets } = useWalletAssets();
+  const walletAssets = walletAssetsData || [];
   const { address: sendAddress } = useChain(defaultChainName);
-
   const { swapTx } = useSwapTx(defaultChainName);
 
-  const handleNoteAmountChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setNoteAmount(event.target.value || ''); // Ensure value is never undefined
-    calculateReceiveAmount(event.target.value, selectedReceiveAsset);
+  const { exchangeRate, isLoading: isLoadingExchangeRate, error: exchangeRateError } = useExchangeRate(selectedSendAsset, selectedReceiveAsset);
+
+  useEffect(() => {
+    if (exchangeRate && sendAmount) {
+      calculateReceiveAmount(sendAmount, exchangeRate);
+    }
+  }, [exchangeRate, sendAmount]);
+
+  const handleSendAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const amount = event.target.value || '';
+    setSendAmount(amount);
+    if (exchangeRate) {
+      calculateReceiveAmount(amount, exchangeRate);
+    }
   };
 
-  const handleSendAssetChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const handleSendAssetChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedAsset = event.target.value || '';
     setSelectedSendAsset(selectedAsset);
 
     const asset = walletAssets.find(a => a.denom === selectedAsset);
     if (asset?.isIbc) {
       setErrorMessage('Invalid Asset: Cannot swap IBC tokens.');
-      setReceiveAmount(''); // Clear the receive amount if there's an error
+      setReceiveAmount('');
     } else {
       setErrorMessage('');
-      calculateReceiveAmount(noteAmount, selectedReceiveAsset);
     }
   };
 
-  const handleReceiveAssetChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const handleReceiveAssetChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedAsset = event.target.value || '';
     setSelectedReceiveAsset(selectedAsset);
-    calculateReceiveAmount(noteAmount, selectedAsset);
   };
 
-  const calculateReceiveAmount = (noteAmount: string, receiveAsset: string) => {
-    if (!receiveAsset || !noteAmount) {
+  const calculateReceiveAmount = (amount: string, rate: string) => {
+    if (!rate || !amount) {
       setReceiveAmount('');
-      return '';
-    }
-
-    const exchangeRate =
-      assets.find(a => a.denom === receiveAsset)?.amount || '0';
-    if (!exchangeRate) {
-      setReceiveAmount('');
-      return '';
-    }
-
-    const amount = (parseFloat(noteAmount) / parseFloat(exchangeRate)).toFixed(
-      6,
-    );
-
-    setReceiveAmount(amount);
-    return amount;
-  };
-
-  const performSwap = async () => {
-    if (!selectedReceiveAsset || !noteAmount || !selectedSendAsset) {
-      alert('Please enter NOTE amount and select both send and receive assets');
       return;
     }
 
-    await swapTx(
-      sendAddress!,
-      sendAddress!,
-      { denom: selectedSendAsset, amount: noteAmount },
-      selectedReceiveAsset,
-    );
+    const calculatedAmount = (parseFloat(amount) * parseFloat(rate)).toFixed(6);
+    setReceiveAmount(calculatedAmount);
   };
+
+  const performSwap = async () => {
+    if (!selectedReceiveAsset || !sendAmount || !selectedSendAsset) {
+      alert('Please enter amount and select both send and receive assets');
+      return;
+    }
+
+    try {
+      await swapTx(
+        sendAddress!,
+        sendAddress!,
+        { denom: selectedSendAsset, amount: sendAmount },
+        selectedReceiveAsset,
+      );
+      // Handle successful swap (e.g., show success message, reset form, etc.)
+    } catch (error) {
+      console.error('Swap failed:', error);
+      setErrorMessage('Swap failed. Please try again.');
+    }
+  };
+
+  if (isLoadingAssets || isLoadingWalletAssets) {
+    return <div>Loading assets...</div>;
+  }
 
   return (
     <div className="min-h-screen relative">
@@ -101,9 +99,11 @@ export const SwapSection = () => {
             Discover truly decentralized real-world assets
           </h1>
 
-          <div className="min-h-[24px]">
-            <p className="text-error">{errorMessage}</p>{' '}
-          </div>
+          {errorMessage && (
+            <div className="min-h-[24px]">
+              <p className="text-error">{errorMessage}</p>
+            </div>
+          )}
 
           <div className="flex justify-between items-center w-full gap-8">
             {/* Swap Box 1 */}
@@ -123,26 +123,26 @@ export const SwapSection = () => {
               </select>
               <input
                 type="number"
-                placeholder="Amount of NOTE"
+                placeholder="Amount to send"
                 className="w-full mb-4 p-2 border rounded text-black"
-                value={noteAmount}
-                onChange={handleNoteAmountChange}
+                value={sendAmount}
+                onChange={handleSendAmountChange}
               />
               <input
                 type="text"
                 readOnly
                 placeholder="Wallet Address"
                 className="w-full mb-4 p-2 border rounded text-black"
-                value={sendAddress}
+                value={sendAddress || ''}
               />
             </div>
 
             <div className="flex flex-col items-center justify-center gap-4">
-              {/* Swap Button */}
               <button
                 className="bg-black py-3 px-6 rounded-lg font-semibold border border-green-700 hover:bg-green-600 transition"
                 type="button"
                 onClick={performSwap}
+                disabled={!selectedSendAsset || !selectedReceiveAsset || !sendAmount}
               >
                 Initiate Swap
               </button>
@@ -176,12 +176,13 @@ export const SwapSection = () => {
                 className="w-full mb-4 p-2 border rounded text-black"
                 id="receiveAddress"
                 readOnly
+                value={sendAddress || ''}
               />
-              {selectedReceiveAsset && (
+              {isLoadingExchangeRate && <p className="text-white">Loading exchange rate...</p>}
+              {exchangeRateError && <p className="text-red-500">Error fetching exchange rate. Please try again.</p>}
+              {exchangeRate && (
                 <p className="text-white">
-                  Exchange rate:{' '}
-                  {assets.find(a => a.denom === selectedReceiveAsset)?.amount}{' '}
-                  note per {selectedReceiveAsset}
+                  Exchange rate: 1 {selectedSendAsset} = {exchangeRate} {selectedReceiveAsset}
                 </p>
               )}
             </div>
