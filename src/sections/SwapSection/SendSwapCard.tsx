@@ -3,9 +3,11 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 import { SwapCard } from '@/components/Swap';
 import { defaultChainName } from '@/constants';
-import { SendAmountAtom } from '@/sections/SwapSection/atoms/SendAmountAtom';
-import { SendAssetAtom } from '@/sections/SwapSection/atoms/SendAssetAtom';
-import { WalletAssetsAtom } from '@/sections/SwapSection/atoms/WalletAssetsAtom';
+import {
+  SendAmountAtom,
+  SendAssetAtom,
+  WalletAssetsAtom,
+} from '@/sections/SwapSection/atoms';
 
 export const SendSwapCard = () => {
   const setSendAsset = useSetAtom(SendAssetAtom);

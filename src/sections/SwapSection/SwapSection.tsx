@@ -7,10 +7,12 @@ import { WalletInfoContainer } from '@/components/WalletInfo';
 import { defaultChainName } from '@/constants';
 import { useSwapTx } from '@/hooks/useSwapTx';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
-import { ReceiveAssetAtom } from '@/sections/SwapSection/atoms/ReceiveAssetAtom';
-import { SendAmountAtom } from '@/sections/SwapSection/atoms/SendAmountAtom';
-import { SendAssetAtom } from '@/sections/SwapSection/atoms/SendAssetAtom';
-import { WalletAssetsAtom } from '@/sections/SwapSection/atoms/WalletAssetsAtom';
+import {
+  ReceiveAssetAtom,
+  SendAmountAtom,
+  SendAssetAtom,
+  WalletAssetsAtom,
+} from '@/sections/SwapSection/atoms';
 import { ReceiveSwapCard } from '@/sections/SwapSection/ReceiveSwapCard';
 import { SendSwapCard } from '@/sections/SwapSection/SendSwapCard';
 

@@ -5,7 +5,7 @@ import { SwapCard } from '@/components/Swap';
 import { defaultChainName } from '@/constants';
 import { useOracleAssets } from '@/hooks';
 import { useReceiveAmount } from '@/sections';
-import { ReceiveAssetAtom } from '@/sections/SwapSection/atoms/ReceiveAssetAtom';
+import { ReceiveAssetAtom } from '@/sections/SwapSection/atoms';
 
 export const ReceiveSwapCard = () => {
   const setReceiveAsset = useSetAtom(ReceiveAssetAtom);
