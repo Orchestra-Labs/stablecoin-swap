@@ -23,22 +23,25 @@ const AssetRow = (asset: {
   const { denom, amount, isIbc, logo, exponent, symbol } = asset;
   const amountNumber = parseInt(amount, 10);
   const normalizedAmount = amountNumber / 10 ** (exponent ?? 0);
+
   return (
-    <TableRow key={denom}>
-      <TableCell>
+    <TableRow key={denom} className="w-full">
+      <TableCell className="w-[20%]">
         {logo ? (
           <img alt={`logo_${denom}`} className="w-6 h-6" src={logo} />
         ) : (
           <CircleDollarSign className="h-6 w-6" />
         )}
       </TableCell>
-      <TableCell className="font-medium">{symbol}</TableCell>
-      <TableCell>
+      <TableCell className="font-medium w-[30%] truncate">{symbol}</TableCell>
+      <TableCell className="w-[25%] text-right truncate">
         {normalizedAmount.toLocaleString('en-US', {
           maximumFractionDigits: 2,
         })}
       </TableCell>
-      <TableCell>{isIbc ? 'ibc' : 'Native Token'}</TableCell>
+      <TableCell className="w-[25%] text-right truncate">
+        {isIbc ? 'ibc' : 'Native Token'}
+      </TableCell>
     </TableRow>
   );
 };
@@ -59,7 +62,7 @@ export const WalletInfoContainer = () => {
   };
 
   return (
-    <Card className="w-[380px] bg-black backdrop-blur-xl">
+    <Card className="w-full max-w-[380px] bg-black backdrop-blur-xl">
       <CardHeader>
         <CardTitle>Wallet {username}</CardTitle>
         <CardDescription
@@ -70,13 +73,15 @@ export const WalletInfoContainer = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Table className="border">
-          <TableBody>
-            {assets.map(asset => {
-              return AssetRow(asset);
-            })}
-          </TableBody>
-        </Table>
+        <div className="overflow-auto">
+          <Table className="border table-fixed w-full">
+            <TableBody>
+              {assets.map(asset => {
+                return AssetRow(asset);
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
