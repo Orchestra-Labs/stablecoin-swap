@@ -12,6 +12,7 @@ import {
 import { Table, TableBody, TableCell, TableRow } from '@/components/Table';
 import { defaultChainName } from '@/constants';
 import { useToast, useWalletAssets } from '@/hooks';
+import { hashToHumanReadable } from '@/helpers';
 
 const AssetRow = (asset: {
   denom: string;
@@ -54,11 +55,12 @@ export const WalletInfoContainer = () => {
 
   const assets = data?.resolvedAddresses || [];
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(address!);
+  const copyToClipboard = (address: string) => {
+    navigator.clipboard.writeText(address);
+
     toast({
-      title: 'Address copied to clipboard',
-      description: 'You can now paste it anywhere',
+      title: `Copied to clipboard!`,
+      description: `Address ${hashToHumanReadable(address)} has been copied.`,
     });
   };
 
@@ -79,16 +81,13 @@ export const WalletInfoContainer = () => {
       const showBottomShadow =
         scrollTop === 0 || scrollTop + clientHeight < scrollHeight;
 
-      // Show top shadow when not at the top
       setShowTopShadow(showTopShadow);
-
-      // Show bottom shadow until the bottom is reached
       setShowBottomShadow(showBottomShadow);
     };
 
     const container = tableContainerRef.current;
     container?.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initialize shadow visibility
+    handleScroll();
 
     return () => {
       container?.removeEventListener('scroll', handleScroll);
@@ -112,7 +111,7 @@ export const WalletInfoContainer = () => {
         <CardTitle>Wallet {username}</CardTitle>
         <CardDescription
           className="hover:bg-blue-hover hover:cursor-pointer p-2 rounded-md"
-          onClick={copyToClipboard}
+          onClick={() => copyToClipboard((address || '').toString())}
         >
           {address}
         </CardDescription>
