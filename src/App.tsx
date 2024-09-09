@@ -2,7 +2,7 @@ import '@interchain-ui/react/styles';
 
 import { wallets } from '@cosmos-kit/keplr';
 import { ChainProvider } from '@cosmos-kit/react';
-import { getSigningCosmosClientOptions } from '@orchestra_labs/symphonyjs';
+import { getSigningCosmosClientOptions } from '@orchestra-labs/symphonyjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { assets, chains } from 'chain-registry/testnet';
 import { SignerOptions } from 'cosmos-kit';
