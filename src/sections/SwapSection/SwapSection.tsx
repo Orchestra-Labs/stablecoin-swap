@@ -55,7 +55,7 @@ export const SwapSection = () => {
       <div className="flex justify-center items-center min-h-[inherit] relative z-[1] px-25px md:px-6">
         <div
           className="flex flex-col max-w-[882px] text-center items-center gap-4"
-          style={{ marginTop: '6rem' }}
+          style={{ marginTop: '6rem', marginBottom: '2rem' }}
         >
           <WalletInfoContainer />
 
