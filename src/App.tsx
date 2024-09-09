@@ -1,6 +1,6 @@
 import '@interchain-ui/react/styles';
 
-import { getSigningCosmosClientOptions } from '@orchestra_labs/symphonyjs';
+import { getSigningCosmosClientOptions } from '@orchestra-labs/symphonyjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
@@ -24,7 +24,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
 
 const signerOptions: SignerOptions = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

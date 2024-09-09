@@ -2534,9 +2534,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@orchestra_labs/symphonyjs@npm:^1.0.23":
-  version: 1.0.23
-  resolution: "@orchestra_labs/symphonyjs@npm:1.0.23"
+"@orchestra-labs/symphonyjs@npm:^1.0.28":
+  version: 1.0.28
+  resolution: "@orchestra-labs/symphonyjs@npm:1.0.28"
   dependencies:
     "@cosmjs/amino": "npm:^0.32.3"
     "@cosmjs/crypto": "npm:^0.32.3"
@@ -2545,7 +2545,7 @@ __metadata:
     "@cosmjs/stargate": "npm:^0.32.3"
     "@cosmjs/tendermint-rpc": "npm:^0.32.4"
     "@cosmology/lcd": "npm:^0.13.4"
-  checksum: 10c0/aecbbc0cf16ed684de1093ae626261358c033c053860895d60e621f9d87b092f909ad02a60e68b411ff3131a094e09ccee82bad0d9398890e610ada04110202e
+  checksum: 10c0/6db3f44c2febd4ea2f93bf02e348b2e6055a59b82e36bfbd18b984105902191089df81aadc873d7805c18df90f637e370320d5c181687d93062179ee71054a02
   languageName: node
   linkType: hard
 
@@ -12343,7 +12343,7 @@ __metadata:
     "@interchain-ui/react-no-ssr": "npm:^0.1.9"
     "@keplr-wallet/types": "npm:^0.12.123"
     "@mantine/hooks": "npm:7.6.1"
-    "@orchestra_labs/symphonyjs": "npm:^1.0.23"
+    "@orchestra-labs/symphonyjs": "npm:^1.0.28"
     "@radix-ui/react-accordion": "npm:~1.1.2"
     "@radix-ui/react-progress": "npm:~1.0.3"
     "@radix-ui/react-select": "npm:~2.0.0"
