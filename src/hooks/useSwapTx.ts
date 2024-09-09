@@ -1,7 +1,7 @@
 import { Coin } from '@cosmjs/amino';
 import { isDeliverTxSuccess } from '@cosmjs/stargate';
 import { useChain } from '@cosmos-kit/react';
-import { getSigningOsmosisClient, osmosis } from '@orchestra_labs/symphonyjs';
+import { getSigningOsmosisClient, osmosis } from '@orchestra-labs/symphonyjs';
 
 import { useToast } from '@/hooks/useToast';
 
