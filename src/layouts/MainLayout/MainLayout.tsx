@@ -8,7 +8,7 @@ const MainLayout: FC = () => {
   return (
     <div className="w-full h-full bg-background-black min-h-screen max-w-screen flex flex-col">
       <Header />
-      <main className="w-full flex-1">
+      <main className="w-full flex-1 pt-8">
         <Outlet />
       </main>
       <Toaster />
