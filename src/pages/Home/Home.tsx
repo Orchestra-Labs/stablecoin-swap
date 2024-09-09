@@ -17,7 +17,7 @@ export const Home = () => {
         {isWalletConnected ? (
           <SwapSection />
         ) : (
-          <div className="justify-center flex items-center">
+          <div className="h-screen justify-center flex items-center">
             <Button variant="outline" onClick={connect}>
               <Wallet className="mr-2 h-4 w-4" /> Connect Wallet
             </Button>
