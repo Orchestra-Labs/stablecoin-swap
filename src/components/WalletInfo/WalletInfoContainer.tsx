@@ -1,5 +1,6 @@
 import { useChain } from '@cosmos-kit/react';
 import { CircleDollarSign } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
 
 import {
   Card,
@@ -25,7 +26,7 @@ const AssetRow = (asset: {
   const normalizedAmount = amountNumber / 10 ** (exponent ?? 0);
 
   return (
-    <TableRow key={denom} className="w-full">
+    <TableRow key={denom} className="w-full h-12">
       <TableCell className="w-[20%]">
         {logo ? (
           <img alt={`logo_${denom}`} className="w-6 h-6" src={logo} />
@@ -61,6 +62,60 @@ export const WalletInfoContainer = () => {
     });
   };
 
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [showTopShadow, setShowTopShadow] = useState(false);
+  const [showBottomShadow, setShowBottomShadow] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const container = tableContainerRef.current;
+      if (!container) return;
+
+      const scrollTop = container.scrollTop;
+      const scrollHeight = container.scrollHeight;
+      const clientHeight = container.clientHeight;
+
+      const showTopShadow = scrollTop > 0;
+      const showBottomShadow =
+        scrollTop === 0 || scrollTop + clientHeight < scrollHeight;
+
+      // Log scroll-related values to the console
+      console.log('Scroll Position (scrollTop):', scrollTop);
+      console.log('Visible Area Height (clientHeight):', clientHeight);
+      console.log('Total Content Height (scrollHeight):', scrollHeight);
+      console.log(
+        `Fully Scrolled to Bottom: ${scrollTop + clientHeight === scrollHeight}`,
+      );
+      console.log(`Show Top Shadow:`, showTopShadow);
+      console.log(`Show Bottom Shadow:`, showBottomShadow);
+
+      // Show top shadow when not at the top
+      setShowTopShadow(showTopShadow);
+
+      // Show bottom shadow until the bottom is reached
+      setShowBottomShadow(showBottomShadow);
+    };
+
+    const container = tableContainerRef.current;
+    container?.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initialize shadow visibility
+
+    return () => {
+      container?.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const boxShadowStyles = {
+    boxShadow: [
+      showTopShadow ? 'inset 0 12px 10px -8px rgba(255, 255, 255, 0.8)' : '',
+      showBottomShadow
+        ? 'inset 0 -12px 10px -8px rgba(255, 255, 255, 0.8)'
+        : '',
+    ]
+      .filter(Boolean)
+      .join(', '),
+  };
+
   return (
     <Card className="w-full max-w-[380px] bg-black backdrop-blur-xl">
       <CardHeader>
@@ -73,7 +128,11 @@ export const WalletInfoContainer = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-auto">
+        <div
+          className="overflow-y-auto max-h-[156px] hide-scrollbar"
+          style={boxShadowStyles}
+          ref={tableContainerRef}
+        >
           <Table className="border table-fixed w-full">
             <TableBody>
               {assets.map(asset => {
