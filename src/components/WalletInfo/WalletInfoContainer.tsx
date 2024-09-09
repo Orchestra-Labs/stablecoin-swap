@@ -79,16 +79,6 @@ export const WalletInfoContainer = () => {
       const showBottomShadow =
         scrollTop === 0 || scrollTop + clientHeight < scrollHeight;
 
-      // Log scroll-related values to the console
-      console.log('Scroll Position (scrollTop):', scrollTop);
-      console.log('Visible Area Height (clientHeight):', clientHeight);
-      console.log('Total Content Height (scrollHeight):', scrollHeight);
-      console.log(
-        `Fully Scrolled to Bottom: ${scrollTop + clientHeight === scrollHeight}`,
-      );
-      console.log(`Show Top Shadow:`, showTopShadow);
-      console.log(`Show Bottom Shadow:`, showBottomShadow);
-
       // Show top shadow when not at the top
       setShowTopShadow(showTopShadow);
 
