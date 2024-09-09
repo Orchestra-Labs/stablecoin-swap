@@ -15,6 +15,7 @@ import {
 } from '@/sections/SwapSection/atoms';
 import { ReceiveSwapCard } from '@/sections/SwapSection/ReceiveSwapCard';
 import { SendSwapCard } from '@/sections/SwapSection/SendSwapCard';
+import { useEffect } from 'react';
 
 export const SwapSection = () => {
   const selectedSendAsset = useAtomValue(SendAssetAtom);
@@ -24,7 +25,9 @@ export const SwapSection = () => {
   const setWalletAssets = useSetAtom(WalletAssetsAtom);
 
   const { data, refetch } = useWalletAssets();
-  setWalletAssets(data?.assets ?? []); // Ensure it's always an array
+  useEffect(() => {
+    setWalletAssets(data?.assets ?? []); // Ensure it's always an array
+  }, [data]);
 
   const { address: sendAddress } = useChain(defaultChainName);
 
@@ -76,44 +79,6 @@ export const SwapSection = () => {
             </div>
 
             <ReceiveSwapCard />
-
-            {/* Swap Box 2 */}
-            {/* <div className="border border-gray-300 bg-black rounded-lg p-6 w-1/2"> */}
-            {/*  <h3 className="text-white mb-2">Receive</h3> */}
-            {/*  <select */}
-            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
-            {/*    value={selectedReceiveAsset} */}
-            {/*    onChange={handleReceiveAssetChange} */}
-            {/*  > */}
-            {/*    <option value="">Select receive asset</option> */}
-            {/*    {assets.map(asset => ( */}
-            {/*      <option key={asset.denom} value={asset.denom}> */}
-            {/*        {asset.denom} */}
-            {/*      </option> */}
-            {/*    ))} */}
-            {/*  </select> */}
-            {/*  <input */}
-            {/*    type="text" */}
-            {/*    value={receiveAmount} */}
-            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
-            {/*    readOnly */}
-            {/*    placeholder="Receive amount" */}
-            {/*  /> */}
-            {/*  <input */}
-            {/*    type="text" */}
-            {/*    placeholder={sendAddress || 'Wallet Address'} */}
-            {/*    className="w-full mb-4 p-2 border rounded text-black" */}
-            {/*    id="receiveAddress" */}
-            {/*    readOnly */}
-            {/*  /> */}
-            {/*  {selectedReceiveAsset && ( */}
-            {/*    <p className="text-white"> */}
-            {/*      Exchange rate:{' '} */}
-            {/*      {assets.find(a => a.denom === selectedReceiveAsset)?.amount}{' '} */}
-            {/*      note per {selectedReceiveAsset} */}
-            {/*    </p> */}
-            {/*  )} */}
-            {/* </div> */}
           </div>
         </div>
       </div>
