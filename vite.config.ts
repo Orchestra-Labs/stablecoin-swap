@@ -1,16 +1,19 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path'
 
+
 export default defineConfig({
-  plugins: [react(), viteTsconfigPaths(), nodePolyfills()],
+  define: {
+    global: "window",
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
+  plugins: [react(), viteTsconfigPaths()],
   server: {
     open: true,
     host: true,

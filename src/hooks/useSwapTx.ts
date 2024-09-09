@@ -1,5 +1,5 @@
 import { Coin } from '@cosmjs/amino';
-import { DeliverTxResponse, isDeliverTxSuccess } from '@cosmjs/stargate';
+import { isDeliverTxSuccess } from '@cosmjs/stargate';
 import { useChain } from '@cosmos-kit/react';
 import { getSigningOsmosisClient, osmosis } from '@orchestra_labs/symphonyjs';
 
@@ -61,26 +61,28 @@ export const useSwapTx = (chainName: string) => {
         description: 'Waiting for transaction to be included in the block',
       });
 
-      client
-        .signAndBroadcast(signerAddress!, [swapMsg], {
+      const response = await client.signAndBroadcast(
+        signerAddress!,
+        [swapMsg],
+        {
           amount: [{ denom: 'note', amount: '1000000' }],
           gas: '100000',
-        })
-        .then((response: DeliverTxResponse) => {
-          txToastProgress.dismiss();
-          if (isDeliverTxSuccess(response)) {
-            toast({
-              title: 'Swap Successful!',
-              description: `Transaction ${response.transactionHash} has been included in the block, gas used $note: ${response.gasUsed}`,
-            });
-          } else {
-            toast({
-              variant: 'destructive',
-              title: 'Swap Failed!',
-              description: `Transaction ${response.transactionHash} failed to be included in the block, error: ${response.rawLog}`,
-            });
-          }
+        },
+      );
+
+      txToastProgress.dismiss();
+      if (isDeliverTxSuccess(response)) {
+        toast({
+          title: 'Swap Successful!',
+          description: `Transaction ${response.transactionHash} has been included in the block, gas used $note: ${response.gasUsed}`,
         });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Swap Failed!',
+          description: `Transaction ${response.transactionHash} failed to be included in the block, error: ${response.rawLog}`,
+        });
+      }
     } catch (error) {
       if (error instanceof Error) {
         toast({

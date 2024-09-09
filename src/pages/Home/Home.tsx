@@ -1,4 +1,5 @@
 import { useChain } from '@cosmos-kit/react';
+import { Provider } from 'jotai';
 import { Wallet } from 'lucide-react';
 
 import { Button } from '@/components/Button/button';
@@ -11,16 +12,18 @@ export const Home = () => {
   console.log('isWalletConnected', isWalletConnected);
 
   return (
-    <div>
-      {isWalletConnected ? (
-        <SwapSection />
-      ) : (
-        <div className="h-screen justify-center flex items-center">
-          <Button variant="outline" onClick={connect}>
-            <Wallet className="mr-2 h-4 w-4" /> Connect Wallet
-          </Button>
-        </div>
-      )}
-    </div>
+    <Provider>
+      <div>
+        {isWalletConnected ? (
+          <SwapSection />
+        ) : (
+          <div className="justify-center flex items-center">
+            <Button variant="outline" onClick={connect}>
+              <Wallet className="mr-2 h-4 w-4" /> Connect Wallet
+            </Button>
+          </div>
+        )}
+      </div>
+    </Provider>
   );
 };

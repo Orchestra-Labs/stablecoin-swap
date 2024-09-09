@@ -6,3 +6,25 @@ export const chainEndpoint = {
     rest: ['https://symphony-api.kleomedes.network'],
   },
 };
+export const localAssetRegistry = {
+  uusd: {
+    symbol: 'HUSD',
+    exponent: 6,
+    logo: undefined,
+  },
+  ukhd: {
+    symbol: 'HKD',
+    exponent: 6,
+    logo: undefined,
+  },
+  uvnd: {
+    symbol: 'HVND',
+    exponent: 6,
+    logo: undefined,
+  },
+  note: {
+    symbol: 'MLD',
+    exponent: 6,
+    logo: undefined,
+  },
+};

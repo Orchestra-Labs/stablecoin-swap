@@ -1,8 +1,12 @@
+import { useChain } from '@cosmos-kit/react';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
 import BigNumber from 'bignumber.js';
+import { useAtomValue } from 'jotai';
+import { useMemo } from 'react';
 
-import { rpcUrl } from '@/constants';
+import { defaultChainName } from '@/constants';
+import { ReceiveAssetAtom } from '@/sections/SwapSection/atoms/ReceiveAssetAtom.ts';
+import { SendAssetAtom } from '@/sections/SwapSection/atoms/SendAssetAtom.ts';
 
 interface ExchangeRateResponse {
   return_coin: {
@@ -11,15 +15,23 @@ interface ExchangeRateResponse {
   };
 }
 
-export function useExchangeRate(sendAsset: string, receiveAsset: string) {
+export function useExchangeRate() {
+  const sendAsset = useAtomValue(SendAssetAtom);
+  const receiveAsset = useAtomValue(ReceiveAssetAtom);
+  const { getRestEndpoint } = useChain(defaultChainName);
+
+  console.log('assets change calculate exchange', sendAsset, receiveAsset);
+
   const queryExchangeRate = useQuery<string | null, Error, string | null>({
     queryKey: ['exchangeRate', sendAsset, receiveAsset],
     queryFn: async ({ queryKey }): Promise<string | null> => {
       const [, sendAsset, receiveAsset] = queryKey as [string, string, string];
       if (!sendAsset || !receiveAsset) return null;
 
+      const restEndpoint = await getRestEndpoint();
+
       const response = await fetch(
-        `${rpcUrl}/osmosis/market/v1beta1/swap?offerCoin=1000000${sendAsset}&askDenom=${receiveAsset}`
+        `${restEndpoint}/osmosis/market/v1beta1/swap?offerCoin=1000000${sendAsset}&askDenom=${receiveAsset}`,
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -35,15 +47,16 @@ export function useExchangeRate(sendAsset: string, receiveAsset: string) {
   const exchangeRate = useMemo(() => {
     if (queryExchangeRate.data) {
       // Use BigNumber for precise decimal arithmetic
-      const rate = new BigNumber(queryExchangeRate.data).dividedBy(1000000);
-      return rate.toFixed(6); // Return as string with 6 decimal places
+      return new BigNumber(queryExchangeRate.data)
+        .dividedBy(1000000)
+        .toNumber(); // Return as string with 6 decimal places
     }
-    return null;
+    return 0;
   }, [queryExchangeRate.data]);
 
   return {
     isLoading: queryExchangeRate.isLoading,
     error: queryExchangeRate.error,
-    exchangeRate: exchangeRate,
+    exchangeRate,
   };
 }
