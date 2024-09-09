@@ -1,6 +1,6 @@
 # ![Orchestra Logo](./src/assets/images/symphony_logo.svg 'Orchestra Logo') Orchestra Labs
 
-The front page and first destination for Orchestra Labs developers.
+The swap dApp to interact with Symphony's stablecoins.
 
 ## Installation
 
@@ -8,7 +8,7 @@ To set up this project locally, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Orchestra-Labs/orchestralabs.org.git
+   git clone https://github.com/Orchestra-Labs/stablecoin-swap.git
    ```
 2. Navigate to the project directory:
    ```bash
