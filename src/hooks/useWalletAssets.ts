@@ -2,8 +2,9 @@ import { useChain } from '@cosmos-kit/react';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { defaultChainName, rpcUrl } from '@/constants';
+import { defaultChainName, localAssetRegistry, rpcUrl } from '@/constants';
 
+import { useAsset } from './useAsset';
 
 // Function to resolve IBC denom
 const resolveIbcDenom = async (ibcDenom: string): Promise<string> => {
@@ -30,6 +31,7 @@ export function useWalletAssets() {
     isWalletConnected,
     getStargateClient,
   } = useChain(defaultChainName);
+  const { find } = useAsset(defaultChainName);
   const assetsQuery = useQuery({
     queryKey: ['walletAssets', walletAddress],
     enabled: isWalletConnected,
@@ -38,10 +40,34 @@ export function useWalletAssets() {
       const client = await getStargateClient();
       const coins = await client.getAllBalances(walletAddress);
       return coins.map(coin => {
+        let symbol: string;
+        let logo: string | undefined;
+        let exponent: number;
+        const registryAsset = find(coin.denom);
+        if (!registryAsset) {
+          symbol =
+            localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
+              ?.symbol ?? coin.denom;
+          exponent =
+            localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
+              ?.exponent ?? 0;
+          logo =
+            localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
+              ?.logo;
+        } else {
+          symbol = registryAsset.symbol;
+          exponent =
+            localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
+              ?.exponent ?? 0;
+          logo = registryAsset.logo_URIs?.png ?? registryAsset.logo_URIs?.jpeg;
+        }
         return {
+          symbol: symbol ?? coin.denom,
+          exponent: exponent ?? 0,
           denom: coin.denom,
           amount: coin.amount,
           isIbc: coin.denom.startsWith('ibc/'),
+          logo,
         };
       });
     },
@@ -66,14 +92,48 @@ export function useWalletAssets() {
     },
   });
 
-  const resolvedAssets = useMemo(
-    () => resolvedAddressesQuery.data,
-    [resolvedAddressesQuery.data],
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allQueries = {
+    assets: assetsQuery,
+    resolvedAddresses: resolvedAddressesQuery,
+  };
+
+  const updatableQueriesAfterMutation = [assetsQuery, resolvedAddressesQuery];
+
+  const isInitialFetching = Object.values(allQueries).some(
+    ({ isLoading }) => isLoading,
   );
 
+  const isDoingRefetching = Object.values(allQueries).some(
+    ({ isRefetching }) => isRefetching,
+  );
+
+  const isLoading = isInitialFetching || isDoingRefetching;
+
+  type AllQueries = typeof allQueries;
+
+  type QueriesData = {
+    [Key in keyof AllQueries]: NonNullable<AllQueries[Key]['data']>;
+  };
+
+  const data = useMemo(() => {
+    if (isLoading) return;
+
+    // eslint-disable-next-line consistent-return
+    return Object.fromEntries(
+      Object.entries(allQueries).map(([key, query]) => [key, query.data]),
+    ) as QueriesData;
+  }, [allQueries, isLoading]);
+
+  const refetch = () => {
+    console.log('refresh wallet');
+    updatableQueriesAfterMutation.forEach(query => query.refetch());
+  };
+
   return {
-    isLoading: assetsQuery.isLoading || resolvedAddressesQuery.isLoading,
+    isLoading,
     error: assetsQuery.error || resolvedAddressesQuery.error,
-    data: resolvedAssets ?? [],
+    data,
+    refetch,
   };
 }
