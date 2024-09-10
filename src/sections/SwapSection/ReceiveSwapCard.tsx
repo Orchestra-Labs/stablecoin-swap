@@ -1,18 +1,23 @@
 import { useChain } from '@cosmos-kit/react';
 import { useSetAtom } from 'jotai';
-
 import { SwapCard } from '@/components/Swap';
 import { defaultChainName } from '@/constants';
 import { useOracleAssets } from '@/hooks';
 import { useReceiveAmount } from '@/sections';
-import { ReceiveAssetAtom } from '@/sections/SwapSection/atoms';
+import { ReceiveAssetAtom, LoadingAtom } from '@/sections/SwapSection/atoms';
+import { useEffect } from 'react';
 
 export const ReceiveSwapCard = () => {
   const setReceiveAsset = useSetAtom(ReceiveAssetAtom);
   const { receiveAmount } = useReceiveAmount();
   const { assets } = useOracleAssets();
+  const setLoading = useSetAtom(LoadingAtom);
 
   const { address } = useChain(defaultChainName);
+
+  useEffect(() => {
+    setLoading(!assets.length);
+  }, [assets, setLoading]);
 
   const onAmountValueChange = (_: number) => {};
 

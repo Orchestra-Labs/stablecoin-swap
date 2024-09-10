@@ -107,7 +107,7 @@ export default {
     },
   },
   plugins: [
-    plugin(function ({ addVariant, addComponents }) {
+    plugin(function ({ addVariant, addComponents, addUtilities }) {
       addVariant('not-last', '&:not(:last-child)');
       addComponents({
         '.page-container': {
@@ -122,6 +122,17 @@ export default {
         '.section-container': {
           maxWidth: '1328px',
           margin: '0px auto',
+        },
+      });
+      addUtilities({
+        '.hide-scrollbar': {
+          /* Hide scrollbar for WebKit browsers (Chrome, Safari) */
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+          /* Hide scrollbar for Firefox and Edge */
+          'scrollbar-width': 'none', // Firefox
+          '-ms-overflow-style': 'none', // IE and Edge
         },
       });
     }),

@@ -4,6 +4,7 @@ import { useChain } from '@cosmos-kit/react';
 import { getSigningOsmosisClient, osmosis } from '@orchestra-labs/symphonyjs';
 
 import { useToast } from '@/hooks/useToast';
+import { hashToHumanReadable } from '@/helpers';
 
 const { swapSend } = osmosis.market.v1beta1.MessageComposer.withTypeUrl;
 
@@ -15,6 +16,15 @@ export const useSwapTx = (chainName: string) => {
     getOfflineSignerDirect,
   } = useChain(chainName);
   const { toast } = useToast();
+
+  const copyToClipboard = (txHash: string) => {
+    navigator.clipboard.writeText(txHash);
+
+    toast({
+      title: 'Copied to clipboard!',
+      description: `Transaction hash ${hashToHumanReadable(txHash)} has been copied.`,
+    });
+  };
 
   const swapTx = async (
     fromAddress: string,
@@ -54,8 +64,6 @@ export const useSwapTx = (chainName: string) => {
         askDenom,
       });
 
-      // const estimatedFee = await estimateFee([swapMsg]);
-
       const txToastProgress = toast({
         title: 'Swap in Progress',
         description: 'Waiting for transaction to be included in the block',
@@ -74,13 +82,15 @@ export const useSwapTx = (chainName: string) => {
       if (isDeliverTxSuccess(response)) {
         toast({
           title: 'Swap Successful!',
-          description: `Transaction ${response.transactionHash} has been included in the block, gas used $note: ${response.gasUsed}`,
+          description: `Transaction ${hashToHumanReadable(response.transactionHash)} has been included in the block. Click to copy the hash.`,
+          onClick: () => copyToClipboard(response.transactionHash),
         });
       } else {
         toast({
           variant: 'destructive',
           title: 'Swap Failed!',
-          description: `Transaction ${response.transactionHash} failed to be included in the block, error: ${response.rawLog}`,
+          description: `Transaction ${hashToHumanReadable(response.transactionHash)} failed to be included in the block, error: ${response.rawLog}`,
+          onClick: () => copyToClipboard(response.transactionHash),
         });
       }
     } catch (error) {
@@ -88,7 +98,7 @@ export const useSwapTx = (chainName: string) => {
         toast({
           variant: 'destructive',
           title: 'Swap Failed!',
-          description: error.message ?? 'An unexpected error has occured',
+          description: error.message ?? 'An unexpected error has occurred',
         });
       }
     }
