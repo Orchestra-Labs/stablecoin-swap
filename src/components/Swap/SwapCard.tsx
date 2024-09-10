@@ -42,11 +42,13 @@ export const SwapCard = (props: SwapCardProps) => {
     onAssetValueChange,
     onAmountValueChange,
     address,
-    amountInputEnabled = true,
     addressInputEnabled = true,
   } = props;
 
-  // Format the amount with commas using Intl.NumberFormat
+  // Disable amount input until an asset is selected
+  const amountInputEnabled = !!selectedValue;
+
+  // Format as currency
   const formattedAmount = new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 2,
   }).format(amountValue);
@@ -84,10 +86,10 @@ export const SwapCard = (props: SwapCardProps) => {
           lang="en"
           step="1"
           className="bg-black backdrop-blur-xl"
-          type="text" // Change to text to allow displaying commas
+          type="text" // Text to allow displaying commas
           placeholder="amount"
           value={formattedAmount}
-          disabled={!amountInputEnabled}
+          disabled={!amountInputEnabled} // Disable input if no asset is selected
           onChange={handleAmountChange}
         />
         <Input
