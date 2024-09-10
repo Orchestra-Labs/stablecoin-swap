@@ -1,7 +1,6 @@
 import { useChain } from '@cosmos-kit/react';
 import { CircleDollarSign } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
-
 import {
   Card,
   CardContent,
@@ -78,8 +77,7 @@ export const WalletInfoContainer = () => {
       const clientHeight = container.clientHeight;
 
       const showTopShadow = scrollTop > 0;
-      const showBottomShadow =
-        scrollTop === 0 || scrollTop + clientHeight < scrollHeight;
+      const showBottomShadow = scrollTop + clientHeight < scrollHeight;
 
       setShowTopShadow(showTopShadow);
       setShowBottomShadow(showBottomShadow);
@@ -92,7 +90,7 @@ export const WalletInfoContainer = () => {
     return () => {
       container?.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [assets]);
 
   const boxShadowStyles = {
     boxShadow: [
@@ -118,7 +116,7 @@ export const WalletInfoContainer = () => {
       </CardHeader>
       <CardContent>
         <div
-          className="overflow-y-auto max-h-[156px] hide-scrollbar"
+          className="overflow-y-auto min-h-[156px] max-h-[156px] hide-scrollbar"
           style={boxShadowStyles}
           ref={tableContainerRef}
         >

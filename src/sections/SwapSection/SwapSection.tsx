@@ -1,6 +1,5 @@
 import { useChain } from '@cosmos-kit/react';
-import { useAtomValue, useSetAtom } from 'jotai';
-
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import waves2 from '@/assets/images/waves-test.svg';
 import { WalletInfoContainer } from '@/components/WalletInfo';
 import { defaultChainName } from '@/constants';
@@ -8,6 +7,7 @@ import { useSwapTx } from '@/hooks/useSwapTx';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
 import {
   ErrorMessageAtom,
+  LoadingAtom,
   ReceiveAssetAtom,
   SendAmountAtom,
   SendAssetAtom,
@@ -15,6 +15,7 @@ import {
 } from '@/sections/SwapSection/atoms';
 import { ReceiveSwapCard } from '@/sections/SwapSection/ReceiveSwapCard';
 import { SendSwapCard } from '@/sections/SwapSection/SendSwapCard';
+import { Loader } from '@/components';
 
 export const SwapSection = () => {
   const selectedSendAsset = useAtomValue(SendAssetAtom);
@@ -22,12 +23,11 @@ export const SwapSection = () => {
   const sendAmount = useAtomValue(SendAmountAtom);
   const errorMessage = useAtomValue(ErrorMessageAtom);
   const setWalletAssets = useSetAtom(WalletAssetsAtom);
+  const [isLoading, setLoading] = useAtom(LoadingAtom);
 
   const { data, refetch } = useWalletAssets();
   setWalletAssets(data?.assets ?? []); // Ensure it's always an array
-
   const { address: sendAddress } = useChain(defaultChainName);
-
   const { swapTx } = useSwapTx(defaultChainName);
 
   const performSwap = async () => {
@@ -36,14 +36,15 @@ export const SwapSection = () => {
       return;
     }
 
+    setLoading(true); // Set loading true during swap
     await swapTx(
       sendAddress!,
       sendAddress!,
       { denom: selectedSendAsset, amount: sendAmount.toFixed(0) },
       selectedReceiveAsset,
     );
-
     refetch();
+    setLoading(false); // Set loading false when done
   };
 
   return (
@@ -70,11 +71,19 @@ export const SwapSection = () => {
             {/* Swap Button */}
             <div className="flex flex-col items-center justify-center gap-4">
               <button
-                className="bg-black py-3 px-6 rounded-lg font-semibold border border-green-700 hover:bg-green-600 transition"
+                className="relative bg-black py-3 px-6 rounded-lg font-semibold border border-green-700 hover:bg-green-600 transition"
                 type="button"
                 onClick={performSwap}
+                disabled={isLoading}
               >
-                Initiate Swap
+                {isLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader backgroundClass="inherit" />
+                  </div>
+                )}
+                <span className={`${isLoading ? 'opacity-0' : ''}`}>
+                  Initiate Swap
+                </span>
               </button>
             </div>
 
