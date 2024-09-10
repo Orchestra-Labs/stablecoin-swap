@@ -1,5 +1,4 @@
 import { ChangeEvent, useState } from 'react';
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
 import {
@@ -33,7 +32,7 @@ const Option = (props: { value: string; label: string }) => {
 };
 
 export const SwapCard = (props: SwapCardProps) => {
-  const [selectedValue, setSelectedValue] = useState<string>('' as string);
+  const [selectedValue, setSelectedValue] = useState<string>('');
 
   const {
     title,
@@ -46,6 +45,17 @@ export const SwapCard = (props: SwapCardProps) => {
     amountInputEnabled = true,
     addressInputEnabled = true,
   } = props;
+
+  // Format the amount with commas using Intl.NumberFormat
+  const formattedAmount = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 2,
+  }).format(amountValue);
+
+  const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(event.target.value.replace(/,/g, '') || '0');
+    onAmountValueChange(value);
+  };
+
   return (
     <Card className="w-[380px] bg-black backdrop-blur-xl">
       <CardHeader>
@@ -74,13 +84,11 @@ export const SwapCard = (props: SwapCardProps) => {
           lang="en"
           step="1"
           className="bg-black backdrop-blur-xl"
-          type="number"
+          type="text" // Change to text to allow displaying commas
           placeholder="amount"
-          value={amountValue}
+          value={formattedAmount}
           disabled={!amountInputEnabled}
-          onChange={(event: ChangeEvent<HTMLInputElement>) =>
-            onAmountValueChange(parseFloat(event.target.value ?? '0'))
-          }
+          onChange={handleAmountChange}
         />
         <Input
           className="bg-black backdrop-blur-xl"
