@@ -16,6 +16,7 @@ import {
 import { ReceiveSwapCard } from '@/sections/SwapSection/ReceiveSwapCard';
 import { SendSwapCard } from '@/sections/SwapSection/SendSwapCard';
 import { Loader } from '@/components';
+import { useEffect } from 'react';
 
 export const SwapSection = () => {
   const selectedSendAsset = useAtomValue(SendAssetAtom);
@@ -26,9 +27,12 @@ export const SwapSection = () => {
   const [isLoading, setLoading] = useAtom(LoadingAtom);
 
   const { data, refetch } = useWalletAssets();
-  setWalletAssets(data?.assets ?? []); // Ensure it's always an array
   const { address: sendAddress } = useChain(defaultChainName);
   const { swapTx } = useSwapTx(defaultChainName);
+
+  useEffect(() => {
+    setWalletAssets(data?.assets ?? []); // Ensure it's always an array
+  }, [data]);
 
   const performSwap = async () => {
     if (!selectedReceiveAsset || !sendAmount || !selectedSendAsset) {
