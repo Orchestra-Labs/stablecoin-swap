@@ -1,8 +1,8 @@
 import { useChain } from '@cosmos-kit/react';
-import { useSetAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { SwapCard } from '@/components/Swap';
-import { defaultChainName, IBCPrefix } from '@/constants';
+import { defaultChainName, IBCPrefix, localAssetRegistry } from '@/constants';
 import { useOracleAssets } from '@/hooks';
 import {
   Asset,
@@ -11,47 +11,11 @@ import {
   useReceiveAmount,
 } from '@/sections';
 
-// Define the constant assets, including MLD and HUSD
-const additionalAssets: Asset[] = [
-  {
-    denom: 'ukhd',
-    amount: '0',
-    isIbc: false,
-    logo: '',
-    symbol: 'HHKD', // Updated symbol for ukhd
-    exponent: 6,
-  },
-  {
-    denom: 'uvnd',
-    amount: '0',
-    isIbc: false,
-    logo: '',
-    symbol: 'HVND', // Updated symbol for uvnd
-    exponent: 6,
-  },
-  {
-    denom: 'note',
-    amount: '0',
-    isIbc: false,
-    logo: '',
-    symbol: 'MLD', // Updated symbol for note
-    exponent: 6,
-  },
-  {
-    denom: 'uusd',
-    amount: '0',
-    isIbc: false,
-    logo: '',
-    symbol: 'HUSD', // Updated symbol for uusd
-    exponent: 6,
-  },
-];
-
 export const ReceiveSwapCard = () => {
-  const setReceiveAsset = useSetAtom(ReceiveAssetAtom);
+  const [receiveAsset, setReceiveAsset] = useAtom(ReceiveAssetAtom);
   const { receiveAmount } = useReceiveAmount();
-  const { assets } = useOracleAssets(); // Oracle assets from API or source
-  const { address } = useChain(defaultChainName); // Chain connection address
+  const { assets } = useOracleAssets();
+  const { address } = useChain(defaultChainName);
 
   const [crossReferencedAssets, setCrossReferencedAssets] = useState<Asset[]>(
     [],
@@ -59,11 +23,9 @@ export const ReceiveSwapCard = () => {
 
   // Recalculate crossReferencedAssets when assets change
   useEffect(() => {
-    // Merge the constant assets (additionalAssets) with the Oracle assets
-    const mergedAssets = [...assets, ...additionalAssets];
+    const mergedAssets = [...assets, ...Object.values(localAssetRegistry)];
 
     const updatedAssets = mergedAssets.map(asset => {
-      // Merge with the symbol or use the default asset symbol or denom
       return {
         ...asset,
         symbol: asset.symbol || asset.denom,
@@ -73,12 +35,15 @@ export const ReceiveSwapCard = () => {
     setCrossReferencedAssets(updatedAssets);
   }, [assets]);
 
-  console.log('crossReferencedAssets:', crossReferencedAssets);
-
   const onAmountValueChange = (_: number) => {};
 
-  const onAssetValueChange = (value: string) => {
-    setReceiveAsset(value || '');
+  const onAssetValueChange = (denom: string) => {
+    const selectedAsset = crossReferencedAssets.find(
+      asset => asset.denom === denom,
+    );
+    if (selectedAsset) {
+      setReceiveAsset(selectedAsset);
+    }
   };
 
   return (
@@ -96,6 +61,7 @@ export const ReceiveSwapCard = () => {
       onAmountValueChange={onAmountValueChange}
       amountInputEnabled={false}
       address={address ?? ''}
+      selectedAsset={receiveAsset || null}
     />
   );
 };

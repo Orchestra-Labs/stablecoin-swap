@@ -1,6 +1,5 @@
-import { ChangeEvent, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
-import { Input } from '@/components/Input';
+import { ChangeEvent, useEffect, useState } from 'react';
+import { Asset } from '@/sections';
 import {
   Select,
   SelectContent,
@@ -8,13 +7,16 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/Select/Select';
+} from '../Select';
+import { Card, CardContent, CardHeader, CardTitle } from '../Card';
+import { Input } from '../Input';
 
 export type SwapCardProps = {
   title: string;
   selectPlaceholder: string;
   options: { [key: string]: string };
   amountValue: number;
+  selectedAsset: Asset | null;
   onAssetValueChange: (value: string) => void;
   onAmountValueChange: (value: number) => void;
   address: string;
@@ -32,25 +34,33 @@ const Option = (props: { value: string; label: string }) => {
 };
 
 export const SwapCard = (props: SwapCardProps) => {
-  const [selectedValue, setSelectedValue] = useState<string>('');
+  const [localSelectedValue, setLocalSelectedValue] = useState<string>('');
 
   const {
     title,
     selectPlaceholder,
     options,
     amountValue,
+    selectedAsset,
     onAssetValueChange,
     onAmountValueChange,
     address,
     addressInputEnabled = true,
   } = props;
 
-  // Disable amount input until an asset is selected
-  const amountInputEnabled = !!selectedValue;
+  // Update the local selected value whenever the selectedAsset prop changes
+  useEffect(() => {
+    if (selectedAsset?.denom !== localSelectedValue) {
+      setLocalSelectedValue(selectedAsset?.denom || '');
+    }
+  }, [selectedAsset, localSelectedValue]);
 
-  // Format the amount with commas and ensure it respects the correct precision
+  // Disable amount input until an asset is selected
+  const amountInputEnabled = !!localSelectedValue;
+
+  // Use selectedAsset.exponent for maximumFractionDigits or default to 6
   const formattedAmount = new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 6,
+    maximumFractionDigits: selectedAsset?.exponent || 6,
   }).format(amountValue);
 
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -65,9 +75,9 @@ export const SwapCard = (props: SwapCardProps) => {
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <Select
-          value={selectedValue}
+          value={localSelectedValue}
           onValueChange={(value: string) => {
-            setSelectedValue(value);
+            setLocalSelectedValue(value);
             onAssetValueChange(value);
           }}
         >

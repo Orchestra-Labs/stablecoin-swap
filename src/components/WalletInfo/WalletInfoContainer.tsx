@@ -3,7 +3,8 @@ import { CircleDollarSign } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import { defaultChainName, walletPrefix } from '@/constants';
 import { useToast, useWalletAssets } from '@/hooks';
-import { truncateString } from '@/sections';
+import { Asset, SendAssetAtom, truncateString } from '@/sections';
+import { useSetAtom } from 'jotai';
 import {
   Card,
   CardContent,
@@ -13,20 +14,30 @@ import {
 } from '../Card';
 import { Table, TableBody, TableCell, TableRow } from '../Table';
 
-const AssetRow = (asset: {
-  denom: string;
-  amount: string;
-  isIbc: boolean;
-  logo?: string;
-  symbol?: string;
-  exponent?: number;
-}) => {
-  const { denom, amount, isIbc, logo, exponent = 6, symbol } = asset; // Default exponent to 6 if not provided
+const AssetRow = (asset: Asset) => {
+  const { denom, amount, isIbc, logo, exponent = 6, symbol } = asset;
   const amountNumber = parseInt(amount, 10);
-  const normalizedAmount = amountNumber / 10 ** exponent; // Format based on exponent
+  const normalizedAmount = amountNumber / 10 ** exponent;
+
+  const setSendAsset = useSetAtom(SendAssetAtom);
+
+  const handleRowClick = () => {
+    setSendAsset({
+      denom,
+      amount,
+      isIbc,
+      logo,
+      symbol,
+      exponent,
+    });
+  };
 
   return (
-    <TableRow key={denom} className="w-full h-12">
+    <TableRow
+      key={denom}
+      className="w-full h-12 cursor-pointer"
+      onClick={handleRowClick}
+    >
       <TableCell className="w-[20%]">
         {logo ? (
           <img alt={`logo_${denom}`} className="w-6 h-6" src={logo} />
@@ -36,7 +47,7 @@ const AssetRow = (asset: {
       </TableCell>
       <TableCell className="font-medium w-[30%] truncate">{symbol}</TableCell>
       <TableCell className="w-[25%] text-right truncate">
-        {(normalizedAmount / (10 ^ exponent)).toLocaleString('en-US', {
+        {normalizedAmount.toLocaleString('en-US', {
           maximumFractionDigits: exponent,
         })}
       </TableCell>
@@ -123,7 +134,7 @@ export const WalletInfoContainer = () => {
           <Table className="border table-fixed w-full">
             <TableBody>
               {assets.map(asset => {
-                return AssetRow(asset);
+                return <AssetRow key={asset.denom} {...asset} />;
               })}
             </TableBody>
           </Table>
