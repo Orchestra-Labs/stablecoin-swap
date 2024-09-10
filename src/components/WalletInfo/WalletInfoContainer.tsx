@@ -115,9 +115,9 @@ export const WalletInfoContainer = () => {
   };
 
   return (
-    <Card className="w-full max-w-[380px] bg-black backdrop-blur-xl">
+    <Card className="w-full max-w-[500px] bg-black backdrop-blur-xl">
       <CardHeader>
-        <CardTitle>Wallet {username}</CardTitle>
+        <CardTitle>Wallet: {username}</CardTitle>
         <CardDescription
           className="hover:bg-blue-hover hover:cursor-pointer p-2 rounded-md"
           onClick={() => copyToClipboard((address || '').toString())}
