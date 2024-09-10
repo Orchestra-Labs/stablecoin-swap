@@ -4,7 +4,7 @@ import { useChain } from '@cosmos-kit/react';
 import { getSigningOsmosisClient, osmosis } from '@orchestra-labs/symphonyjs';
 
 import { useToast } from '@/hooks/useToast';
-import { hashToHumanReadable } from '@/helpers';
+import { truncateString } from '@/sections';
 
 const { swapSend } = osmosis.market.v1beta1.MessageComposer.withTypeUrl;
 
@@ -22,7 +22,7 @@ export const useSwapTx = (chainName: string) => {
 
     toast({
       title: 'Copied to clipboard!',
-      description: `Transaction hash ${hashToHumanReadable(txHash)} has been copied.`,
+      description: `Transaction hash ${truncateString('', txHash)} has been copied.`,
     });
   };
 
@@ -82,14 +82,14 @@ export const useSwapTx = (chainName: string) => {
       if (isDeliverTxSuccess(response)) {
         toast({
           title: 'Swap Successful!',
-          description: `Transaction ${hashToHumanReadable(response.transactionHash)} has been included in the block. Click to copy the hash.`,
+          description: `Transaction ${truncateString('', response.transactionHash)} has been included in the block. Click to copy the hash.`,
           onClick: () => copyToClipboard(response.transactionHash),
         });
       } else {
         toast({
           variant: 'destructive',
           title: 'Swap Failed!',
-          description: `Transaction ${hashToHumanReadable(response.transactionHash)} failed to be included in the block, error: ${response.rawLog}`,
+          description: `Transaction ${truncateString('', response.transactionHash)} failed to be included in the block, error: ${response.rawLog}`,
           onClick: () => copyToClipboard(response.transactionHash),
         });
       }

@@ -48,9 +48,9 @@ export const SwapCard = (props: SwapCardProps) => {
   // Disable amount input until an asset is selected
   const amountInputEnabled = !!selectedValue;
 
-  // Format as currency
+  // Format the amount with commas and ensure it respects the correct precision
   const formattedAmount = new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 6,
   }).format(amountValue);
 
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {

@@ -36,28 +36,3 @@ export const SOCIAL_LINKS = [
   { id: '4', href: 'https://discord.gg/symphonyblockchain', Icon: Discord },
   { id: '5', href: 'https://linktr.ee/OrchestraLabs', Icon: LinkTree },
 ];
-
-export const EXPLORER_FOOTER_LINKS = [
-  {
-    id: '1',
-    name: 'COMPANY',
-    links: [
-      { id: '1', name: 'About Us', href: '#' },
-      { id: '2', name: 'Contact Us', href: '#' },
-      { id: '3', name: 'Terms & Privacy', href: '#' },
-    ],
-  },
-  {
-    id: '2',
-    name: 'COMMUNITY',
-    links: [
-      {
-        id: '1',
-        name: 'Api Documentation',
-        target: '_blank',
-        href: 'https://orchestralabs.org/documentation',
-      },
-      { id: '2', name: 'Knowledge Base', href: '' },
-    ],
-  },
-];

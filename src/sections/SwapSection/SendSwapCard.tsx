@@ -2,12 +2,9 @@ import { useChain } from '@cosmos-kit/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 import { SwapCard } from '@/components/Swap';
-import { defaultChainName } from '@/constants';
-import {
-  SendAmountAtom,
-  SendAssetAtom,
-  WalletAssetsAtom,
-} from '@/sections/SwapSection/atoms';
+import { defaultChainName, IBCPrefix } from '@/constants';
+import { SendAmountAtom, SendAssetAtom, WalletAssetsAtom } from './atoms';
+import { truncateString } from './utils';
 
 export const SendSwapCard = () => {
   const setSendAsset = useSetAtom(SendAssetAtom);
@@ -31,7 +28,9 @@ export const SendSwapCard = () => {
       selectPlaceholder="Select asset to send"
       options={Object.assign(
         {},
-        ...walletAssets.map(x => ({ [x.denom]: x.denom })),
+        ...walletAssets.map(x => ({
+          [x.denom]: truncateString(IBCPrefix, x.symbol ? x.symbol : x.denom),
+        })),
       )}
       amountValue={sendAmount}
       onAssetValueChange={onAssetValueChange}

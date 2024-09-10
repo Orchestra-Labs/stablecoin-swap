@@ -1,17 +1,17 @@
 import { useChain } from '@cosmos-kit/react';
 import { CircleDollarSign } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
+import { defaultChainName, walletPrefix } from '@/constants';
+import { useToast, useWalletAssets } from '@/hooks';
+import { truncateString } from '@/sections';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/Card';
-import { Table, TableBody, TableCell, TableRow } from '@/components/Table';
-import { defaultChainName } from '@/constants';
-import { useToast, useWalletAssets } from '@/hooks';
-import { hashToHumanReadable } from '@/helpers';
+} from '../Card';
+import { Table, TableBody, TableCell, TableRow } from '../Table';
 
 const AssetRow = (asset: {
   denom: string;
@@ -21,9 +21,9 @@ const AssetRow = (asset: {
   symbol?: string;
   exponent?: number;
 }) => {
-  const { denom, amount, isIbc, logo, exponent, symbol } = asset;
+  const { denom, amount, isIbc, logo, exponent = 6, symbol } = asset; // Default exponent to 6 if not provided
   const amountNumber = parseInt(amount, 10);
-  const normalizedAmount = amountNumber / 10 ** (exponent ?? 0);
+  const normalizedAmount = amountNumber / 10 ** exponent; // Format based on exponent
 
   return (
     <TableRow key={denom} className="w-full h-12">
@@ -36,8 +36,8 @@ const AssetRow = (asset: {
       </TableCell>
       <TableCell className="font-medium w-[30%] truncate">{symbol}</TableCell>
       <TableCell className="w-[25%] text-right truncate">
-        {normalizedAmount.toLocaleString('en-US', {
-          maximumFractionDigits: 2,
+        {(normalizedAmount / (10 ^ exponent)).toLocaleString('en-US', {
+          maximumFractionDigits: exponent,
         })}
       </TableCell>
       <TableCell className="w-[25%] text-right truncate">
@@ -59,7 +59,7 @@ export const WalletInfoContainer = () => {
 
     toast({
       title: `Copied to clipboard!`,
-      description: `Address ${hashToHumanReadable(address)} has been copied.`,
+      description: `Address ${truncateString(walletPrefix, address)} has been copied.`,
     });
   };
 
