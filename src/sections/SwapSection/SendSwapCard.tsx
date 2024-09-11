@@ -34,16 +34,30 @@ export const SendSwapCard = () => {
   };
 
   useEffect(() => {
-    if (isSendUpdate) {
-      if (sendAmount === 0) {
-        setReceiveAmount(0); // If send amount is 0, set receive amount to 0
-      } else if (exchangeRate && sendAmount && receiveAsset) {
-        const newReceiveAmount = sendAmount * exchangeRate;
-        setReceiveAmount(newReceiveAmount);
+    if (isSendUpdate && sendAsset) {
+      // Find the max available balance for the selected sendAsset
+      const amount = parseFloat(sendAsset?.amount || '0');
+      const exponent = sendAsset?.exponent || 6;
+      const maxAvailable = amount / 10 ** exponent;
+
+      if (sendAmount > maxAvailable) {
+        // If sendAmount exceeds available balance, cap it to the maximum
+        setSendAmount(maxAvailable);
+        if (exchangeRate) {
+          const newReceiveAmount = maxAvailable * exchangeRate;
+          setReceiveAmount(newReceiveAmount);
+        }
+      } else {
+        if (sendAmount === 0) {
+          setReceiveAmount(0); // If send amount is 0, set receive amount to 0
+        } else if (exchangeRate && sendAmount && receiveAsset) {
+          const newReceiveAmount = sendAmount * exchangeRate;
+          setReceiveAmount(newReceiveAmount);
+        }
       }
       setIsSendUpdate(false); // Reset flag after the update
     }
-  }, [sendAmount, sendAsset, exchangeRate, receiveAsset]);
+  }, [sendAmount, sendAsset, exchangeRate, receiveAsset, walletAssets]);
 
   return (
     <SwapCard

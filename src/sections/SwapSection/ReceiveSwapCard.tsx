@@ -1,5 +1,5 @@
 import { useChain } from '@cosmos-kit/react';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { SwapCard } from '@/components/Swap';
 import { defaultChainName, IBCPrefix, localAssetRegistry } from '@/constants';
@@ -11,7 +11,7 @@ import {
   ReceiveAmountAtom,
 } from '@/sections';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
-import { SendAmountAtom, SendAssetAtom } from './atoms';
+import { SendAmountAtom, SendAssetAtom, WalletAssetsAtom } from './atoms';
 
 export const ReceiveSwapCard = () => {
   const [receiveAsset, setReceiveAsset] = useAtom(ReceiveAssetAtom);
@@ -19,7 +19,8 @@ export const ReceiveSwapCard = () => {
   const [isReceiveUpdate, setIsReceiveUpdate] = useState(false); // Track Receive updates
 
   const setSendAmount = useSetAtom(SendAmountAtom);
-  const sendAsset = useAtom(SendAssetAtom);
+  const sendAsset = useAtomValue(SendAssetAtom);
+  const walletAssets = useAtomValue(WalletAssetsAtom);
   const { exchangeRate } = useExchangeRate(); // Use exchange rate hook
 
   const { assets } = useOracleAssets();
@@ -59,16 +60,27 @@ export const ReceiveSwapCard = () => {
   };
 
   useEffect(() => {
-    if (isReceiveUpdate) {
+    if (isReceiveUpdate && sendAsset) {
+      const amount = parseFloat(sendAsset?.amount || '0');
+      const exponent = sendAsset?.exponent || 6;
+      const maxAvailable = amount / 10 ** exponent;
+
       if (receiveAmount === 0) {
         setSendAmount(0); // If receive amount is 0, set send amount to 0
       } else if (exchangeRate && receiveAmount && sendAsset) {
         const newSendAmount = receiveAmount / exchangeRate;
-        setSendAmount(newSendAmount);
+
+        // Check if the newSendAmount exceeds the available sendAsset balance
+        if (newSendAmount > maxAvailable) {
+          setSendAmount(maxAvailable);
+          setReceiveAmount(maxAvailable * exchangeRate);
+        } else {
+          setSendAmount(newSendAmount);
+        }
       }
       setIsReceiveUpdate(false); // Reset flag after the update
     }
-  }, [receiveAmount, receiveAsset, exchangeRate, sendAsset]);
+  }, [receiveAmount, receiveAsset, exchangeRate, sendAsset, walletAssets]);
 
   return (
     <SwapCard
