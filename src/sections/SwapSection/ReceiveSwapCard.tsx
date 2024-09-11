@@ -1,5 +1,5 @@
 import { useChain } from '@cosmos-kit/react';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
 import { SwapCard } from '@/components/Swap';
 import { defaultChainName, IBCPrefix, localAssetRegistry } from '@/constants';
@@ -18,7 +18,7 @@ export const ReceiveSwapCard = () => {
   const [receiveAmount, setReceiveAmount] = useAtom(ReceiveAmountAtom);
   const [isReceiveUpdate, setIsReceiveUpdate] = useState(false); // Track Receive updates
 
-  const setSendAmount = useSetAtom(SendAmountAtom);
+  const [sendAmount, setSendAmount] = useAtom(SendAmountAtom);
   const sendAsset = useAtomValue(SendAssetAtom);
   const walletAssets = useAtomValue(WalletAssetsAtom);
   const { exchangeRate } = useExchangeRate(); // Use exchange rate hook
@@ -33,54 +33,65 @@ export const ReceiveSwapCard = () => {
   // Recalculate crossReferencedAssets when assets change
   useEffect(() => {
     const mergedAssets = [...assets, ...Object.values(localAssetRegistry)];
-
-    const updatedAssets = mergedAssets.map(asset => {
-      return {
-        ...asset,
-        symbol: asset.symbol || asset.denom,
-      };
-    });
-
+    const updatedAssets = mergedAssets.map(asset => ({
+      ...asset,
+      symbol: asset.symbol || asset.denom,
+    }));
     setCrossReferencedAssets(updatedAssets);
   }, [assets]);
 
+  // Handle change in receive amount
   const onAmountValueChange = (value: number) => {
     setIsReceiveUpdate(true);
     setReceiveAmount(value);
   };
 
+  // Handle change in receive asset
   const onAssetValueChange = (denom: string) => {
     const selectedAsset = crossReferencedAssets.find(
       asset => asset.denom === denom,
     );
+
     if (selectedAsset) {
-      setIsReceiveUpdate(true);
       setReceiveAsset(selectedAsset);
     }
   };
 
+  // UseEffect to recalculate the receive amount based on the updated receive asset and exchange rate
+  useEffect(() => {
+    if (receiveAsset && exchangeRate && sendAsset) {
+      // Check if sendAsset and receiveAsset are the same (1:1 exchange)
+      if (receiveAsset.denom === sendAsset.denom) {
+        setReceiveAmount(sendAmount); // 1:1 exchange rate
+      } else {
+        const newReceiveAmount = sendAmount * exchangeRate; // Perform the multiplication with parsed value
+        setReceiveAmount(newReceiveAmount); // Update the receive amount based on the new asset
+      }
+    }
+  }, [receiveAsset, exchangeRate, sendAsset, sendAmount]); // Add sendAmount to dependency
+
+  // Recalculate send amount when receive amount is updated, but not when the receive asset changes
   useEffect(() => {
     if (isReceiveUpdate && sendAsset) {
-      const amount = parseFloat(sendAsset?.amount || '0');
+      const amount = parseFloat(sendAsset?.amount || '0'); // Ensure `sendAsset.amount` is a number
       const exponent = sendAsset?.exponent || 6;
       const maxAvailable = amount / 10 ** exponent;
 
       if (receiveAmount === 0) {
-        setSendAmount(0); // If receive amount is 0, set send amount to 0
-      } else if (exchangeRate && receiveAmount && sendAsset) {
+        setSendAmount(0); // Set send amount to 0 if receive is 0
+      } else if (exchangeRate) {
         const newSendAmount = receiveAmount / exchangeRate;
 
-        // Check if the newSendAmount exceeds the available sendAsset balance
         if (newSendAmount > maxAvailable) {
-          setSendAmount(maxAvailable);
-          setReceiveAmount(maxAvailable * exchangeRate);
+          setSendAmount(maxAvailable); // Cap send amount to max available
+          setReceiveAmount(maxAvailable * exchangeRate); // Recompute receive amount
         } else {
-          setSendAmount(newSendAmount);
+          setSendAmount(newSendAmount); // Update send amount
         }
       }
-      setIsReceiveUpdate(false); // Reset flag after the update
+      setIsReceiveUpdate(false); // Reset flag after update
     }
-  }, [receiveAmount, receiveAsset, exchangeRate, sendAsset, walletAssets]);
+  }, [receiveAmount, exchangeRate, sendAsset, walletAssets]);
 
   return (
     <SwapCard
