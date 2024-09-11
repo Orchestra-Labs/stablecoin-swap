@@ -34,7 +34,7 @@ const Option = (props: { value: string; label: string; logo?: string }) => {
         {logo ? (
           <img src={logo} alt={`${label} logo`} className="w-6 h-6" />
         ) : (
-          <CircleDollarSign className="h-6 w-6 text-white" />
+          <CircleDollarSign className="h-6 w-6" />
         )}
         <span>{label}</span>
       </div>
