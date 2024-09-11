@@ -1,5 +1,5 @@
 import { useChain } from '@cosmos-kit/react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { SwapCard } from '@/components/Swap';
 import { defaultChainName, IBCPrefix, localAssetRegistry } from '@/constants';
@@ -8,12 +8,20 @@ import {
   Asset,
   ReceiveAssetAtom,
   truncateString,
-  useReceiveAmount,
+  ReceiveAmountAtom,
 } from '@/sections';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
+import { SendAmountAtom, SendAssetAtom } from './atoms';
 
 export const ReceiveSwapCard = () => {
   const [receiveAsset, setReceiveAsset] = useAtom(ReceiveAssetAtom);
-  const { receiveAmount } = useReceiveAmount();
+  const [receiveAmount, setReceiveAmount] = useAtom(ReceiveAmountAtom);
+  const [isReceiveUpdate, setIsReceiveUpdate] = useState(false); // Track Receive updates
+
+  const setSendAmount = useSetAtom(SendAmountAtom);
+  const sendAsset = useAtom(SendAssetAtom);
+  const { exchangeRate } = useExchangeRate(); // Use exchange rate hook
+
   const { assets } = useOracleAssets();
   const { address } = useChain(defaultChainName);
 
@@ -35,16 +43,32 @@ export const ReceiveSwapCard = () => {
     setCrossReferencedAssets(updatedAssets);
   }, [assets]);
 
-  const onAmountValueChange = (_: number) => {};
+  const onAmountValueChange = (value: number) => {
+    setIsReceiveUpdate(true);
+    setReceiveAmount(value);
+  };
 
   const onAssetValueChange = (denom: string) => {
     const selectedAsset = crossReferencedAssets.find(
       asset => asset.denom === denom,
     );
     if (selectedAsset) {
+      setIsReceiveUpdate(true);
       setReceiveAsset(selectedAsset);
     }
   };
+
+  useEffect(() => {
+    if (isReceiveUpdate) {
+      if (receiveAmount === 0) {
+        setSendAmount(0); // If receive amount is 0, set send amount to 0
+      } else if (exchangeRate && receiveAmount && sendAsset) {
+        const newSendAmount = receiveAmount / exchangeRate;
+        setSendAmount(newSendAmount);
+      }
+      setIsReceiveUpdate(false); // Reset flag after the update
+    }
+  }, [receiveAmount, receiveAsset, exchangeRate, sendAsset]);
 
   return (
     <SwapCard
