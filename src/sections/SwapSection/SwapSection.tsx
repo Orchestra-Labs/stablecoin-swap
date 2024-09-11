@@ -41,11 +41,17 @@ export const SwapSection = () => {
     }
 
     setLoading(true); // Set loading true during swap
+    const sendAmountMicroUnit =
+      sendAmount * 10 ** (selectedSendAsset.exponent || 6);
+
     await swapTx(
       sendAddress!,
       sendAddress!,
-      { denom: selectedSendAsset, amount: sendAmount.toFixed(0) },
-      selectedReceiveAsset,
+      {
+        denom: selectedSendAsset.denom,
+        amount: sendAmountMicroUnit.toString(),
+      },
+      selectedReceiveAsset.denom,
     );
     refetch();
     setLoading(false); // Set loading false when done

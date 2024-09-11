@@ -1,32 +1,43 @@
 import { useChain } from '@cosmos-kit/react';
 import { CircleDollarSign } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
+import { defaultChainName, IBCPrefix, walletPrefix } from '@/constants';
+import { useToast, useWalletAssets } from '@/hooks';
+import { Asset, SendAssetAtom, truncateString } from '@/sections';
+import { useSetAtom } from 'jotai';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/Card';
-import { Table, TableBody, TableCell, TableRow } from '@/components/Table';
-import { defaultChainName } from '@/constants';
-import { useToast, useWalletAssets } from '@/hooks';
-import { hashToHumanReadable } from '@/helpers';
+} from '../Card';
+import { Table, TableBody, TableCell, TableRow } from '../Table';
 
-const AssetRow = (asset: {
-  denom: string;
-  amount: string;
-  isIbc: boolean;
-  logo?: string;
-  symbol?: string;
-  exponent?: number;
-}) => {
-  const { denom, amount, isIbc, logo, exponent, symbol } = asset;
+const AssetRow = (asset: Asset) => {
+  const { denom, amount, isIbc, logo, exponent = 6, symbol } = asset;
   const amountNumber = parseInt(amount, 10);
-  const normalizedAmount = amountNumber / 10 ** (exponent ?? 0);
+  const normalizedAmount = amountNumber / 10 ** exponent;
+
+  const setSendAsset = useSetAtom(SendAssetAtom);
+
+  const handleRowClick = () => {
+    setSendAsset({
+      denom,
+      amount,
+      isIbc,
+      logo,
+      symbol,
+      exponent,
+    });
+  };
 
   return (
-    <TableRow key={denom} className="w-full h-12">
+    <TableRow
+      key={denom}
+      className="w-full h-12 cursor-pointer"
+      onClick={handleRowClick}
+    >
       <TableCell className="w-[20%]">
         {logo ? (
           <img alt={`logo_${denom}`} className="w-6 h-6" src={logo} />
@@ -34,10 +45,12 @@ const AssetRow = (asset: {
           <CircleDollarSign className="h-6 w-6" />
         )}
       </TableCell>
-      <TableCell className="font-medium w-[30%] truncate">{symbol}</TableCell>
+      <TableCell className="font-medium w-[30%] truncate">
+        {truncateString(IBCPrefix, symbol || '')}
+      </TableCell>
       <TableCell className="w-[25%] text-right truncate">
         {normalizedAmount.toLocaleString('en-US', {
-          maximumFractionDigits: 2,
+          maximumFractionDigits: exponent,
         })}
       </TableCell>
       <TableCell className="w-[25%] text-right truncate">
@@ -59,7 +72,7 @@ export const WalletInfoContainer = () => {
 
     toast({
       title: `Copied to clipboard!`,
-      description: `Address ${hashToHumanReadable(address)} has been copied.`,
+      description: `Address ${truncateString(walletPrefix, address)} has been copied.`,
     });
   };
 
@@ -104,9 +117,9 @@ export const WalletInfoContainer = () => {
   };
 
   return (
-    <Card className="w-full max-w-[380px] bg-black backdrop-blur-xl">
+    <Card className="w-full max-w-[500px] bg-black backdrop-blur-xl">
       <CardHeader>
-        <CardTitle>Wallet {username}</CardTitle>
+        <CardTitle>Wallet: {username}</CardTitle>
         <CardDescription
           className="hover:bg-blue-hover hover:cursor-pointer p-2 rounded-md"
           onClick={() => copyToClipboard((address || '').toString())}
@@ -123,7 +136,7 @@ export const WalletInfoContainer = () => {
           <Table className="border table-fixed w-full">
             <TableBody>
               {assets.map(asset => {
-                return AssetRow(asset);
+                return <AssetRow key={asset.denom} {...asset} />;
               })}
             </TableBody>
           </Table>

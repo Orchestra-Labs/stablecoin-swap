@@ -1,7 +1,5 @@
-import { ChangeEvent, useState } from 'react';
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
-import { Input } from '@/components/Input';
+import { ChangeEvent, useEffect, useState } from 'react';
+import { Asset } from '@/sections';
 import {
   Select,
   SelectContent,
@@ -9,13 +7,17 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/Select/Select';
+} from '../Select';
+import { Card, CardContent, CardHeader, CardTitle } from '../Card';
+import { Input } from '../Input';
+import { CircleDollarSign } from 'lucide-react';
 
 export type SwapCardProps = {
   title: string;
   selectPlaceholder: string;
-  options: { [key: string]: string };
+  options: { [key: string]: { label: string; logo?: string } };
   amountValue: number;
+  selectedAsset: Asset | null;
   onAssetValueChange: (value: string) => void;
   onAmountValueChange: (value: number) => void;
   address: string;
@@ -23,29 +25,58 @@ export type SwapCardProps = {
   addressInputEnabled?: boolean;
 };
 
-const Option = (props: { value: string; label: string }) => {
-  const { value, label } = props;
+const Option = (props: { value: string; label: string; logo?: string }) => {
+  const { value, label, logo } = props;
+
   return (
     <SelectItem key={value} value={value}>
-      {label}
+      <div className="flex items-center gap-2">
+        {logo ? (
+          <img src={logo} alt={`${label} logo`} className="w-6 h-6" />
+        ) : (
+          <CircleDollarSign className="h-6 w-6" />
+        )}
+        <span>{label}</span>
+      </div>
     </SelectItem>
   );
 };
 
 export const SwapCard = (props: SwapCardProps) => {
-  const [selectedValue, setSelectedValue] = useState<string>('' as string);
+  const [localSelectedValue, setLocalSelectedValue] = useState<string>('');
 
   const {
     title,
     selectPlaceholder,
     options,
     amountValue,
+    selectedAsset,
     onAssetValueChange,
     onAmountValueChange,
     address,
-    amountInputEnabled = true,
     addressInputEnabled = true,
   } = props;
+
+  // Update the local selected value whenever the selectedAsset prop changes
+  useEffect(() => {
+    if (selectedAsset?.denom !== localSelectedValue) {
+      setLocalSelectedValue(selectedAsset?.denom || '');
+    }
+  }, [selectedAsset, localSelectedValue]);
+
+  // Disable amount input until an asset is selected
+  const amountInputEnabled = !!localSelectedValue;
+
+  // Use selectedAsset.exponent for maximumFractionDigits or default to 6
+  const formattedAmount = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: selectedAsset?.exponent || 6,
+  }).format(amountValue);
+
+  const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(event.target.value.replace(/,/g, '') || '0');
+    onAmountValueChange(value);
+  };
+
   return (
     <Card className="w-[380px] bg-black backdrop-blur-xl">
       <CardHeader>
@@ -53,9 +84,9 @@ export const SwapCard = (props: SwapCardProps) => {
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <Select
-          value={selectedValue}
+          value={localSelectedValue}
           onValueChange={(value: string) => {
-            setSelectedValue(value);
+            setLocalSelectedValue(value);
             onAssetValueChange(value);
           }}
         >
@@ -65,7 +96,12 @@ export const SwapCard = (props: SwapCardProps) => {
           <SelectContent className="bg-black backdrop-blur-xl">
             <SelectGroup>
               {Object.keys(options).map(option => (
-                <Option key={option} value={option} label={options[option]} />
+                <Option
+                  key={option}
+                  value={option}
+                  label={options[option].label}
+                  logo={options[option].logo}
+                />
               ))}
             </SelectGroup>
           </SelectContent>
@@ -74,13 +110,11 @@ export const SwapCard = (props: SwapCardProps) => {
           lang="en"
           step="1"
           className="bg-black backdrop-blur-xl"
-          type="number"
+          type="text" // Text to allow displaying commas
           placeholder="amount"
-          value={amountValue}
-          disabled={!amountInputEnabled}
-          onChange={(event: ChangeEvent<HTMLInputElement>) =>
-            onAmountValueChange(parseFloat(event.target.value ?? '0'))
-          }
+          value={formattedAmount}
+          disabled={!amountInputEnabled} // Disable input if no asset is selected
+          onChange={handleAmountChange}
         />
         <Input
           className="bg-black backdrop-blur-xl"

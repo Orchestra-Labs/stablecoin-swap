@@ -5,8 +5,7 @@ import { useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 
 import { defaultChainName } from '@/constants';
-import { ReceiveAssetAtom } from '@/sections/SwapSection/atoms/ReceiveAssetAtom.ts';
-import { SendAssetAtom } from '@/sections/SwapSection/atoms/SendAssetAtom.ts';
+import { ReceiveAssetAtom, SendAssetAtom } from '@/sections';
 
 interface ExchangeRateResponse {
   return_coin: {
@@ -16,8 +15,8 @@ interface ExchangeRateResponse {
 }
 
 export function useExchangeRate() {
-  const sendAsset = useAtomValue(SendAssetAtom);
-  const receiveAsset = useAtomValue(ReceiveAssetAtom);
+  const sendAsset = useAtomValue(SendAssetAtom)?.denom || '';
+  const receiveAsset = useAtomValue(ReceiveAssetAtom)?.denom || '';
   const { getRestEndpoint } = useChain(defaultChainName);
 
   console.log('assets change calculate exchange', sendAsset, receiveAsset);
@@ -53,6 +52,8 @@ export function useExchangeRate() {
     }
     return 0;
   }, [queryExchangeRate.data]);
+
+  console.log('exchange rate:', exchangeRate);
 
   return {
     isLoading: queryExchangeRate.isLoading,
