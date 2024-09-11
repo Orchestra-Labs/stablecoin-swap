@@ -63,7 +63,7 @@ export const ReceiveSwapCard = () => {
       if (receiveAmount === 0) {
         setSendAmount(0); // If receive amount is 0, set send amount to 0
       } else if (exchangeRate && receiveAmount && sendAsset) {
-        const newSendAmount = receiveAmount / exchangeRate;
+        const newSendAmount = Math.ceil(receiveAmount *1000000 / exchangeRate)/1000000;
         setSendAmount(newSendAmount);
       }
       setIsReceiveUpdate(false); // Reset flag after the update
