@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState, useRef } from 'react';
 import { Asset } from '@/sections';
 import {
   Select,
@@ -16,7 +16,7 @@ export type SwapCardProps = {
   title: string;
   selectPlaceholder: string;
   options: { [key: string]: { label: string; logo?: string } };
-  amountValue: number;
+  amountValue: number; // Passed amount from parent
   selectedAsset: Asset | null;
   onAssetValueChange: (value: string) => void;
   onAmountValueChange: (value: number) => void;
@@ -44,12 +44,14 @@ const Option = (props: { value: string; label: string; logo?: string }) => {
 
 export const SwapCard = (props: SwapCardProps) => {
   const [localSelectedValue, setLocalSelectedValue] = useState<string>('');
+  const [localInputValue, setLocalInputValue] = useState<string>(''); // Local input for temporary user value
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const {
     title,
     selectPlaceholder,
     options,
-    amountValue,
+    amountValue, // Passed value from the parent
     selectedAsset,
     onAssetValueChange,
     onAmountValueChange,
@@ -64,17 +66,51 @@ export const SwapCard = (props: SwapCardProps) => {
     }
   }, [selectedAsset, localSelectedValue]);
 
+  // Effect to update local input value whenever the parent updates amountValue
+  useEffect(() => {
+    if (!isNaN(amountValue)) {
+      setLocalInputValue(formatNumberWithCommas(amountValue)); // Reflect the formatted amountValue from the parent
+    }
+  }, [amountValue]);
+
   // Disable amount input until an asset is selected
   const amountInputEnabled = !!localSelectedValue;
 
-  // Use selectedAsset.exponent for maximumFractionDigits or default to 6
-  const formattedAmount = new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: selectedAsset?.exponent || 6,
-  }).format(amountValue);
+  // Function to format the number with commas
+  const formatNumberWithCommas = (value: number): string => {
+    return new Intl.NumberFormat('en-US', {
+      maximumFractionDigits: selectedAsset?.exponent || 6,
+    }).format(value);
+  };
 
+  // Regex to validate number input and restrict to selectedAsset.exponent decimal places
+  const getRegexForDecimals = (exponent: number) => {
+    return new RegExp(`^\\d*\\.?\\d{0,${exponent}}$`); // Allows digits and at most `exponent` decimals
+  };
+
+  // Handle user input change, use regex to limit decimals, format the value, and propagate to parent
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(event.target.value.replace(/,/g, '') || '0');
-    onAmountValueChange(value);
+    const inputValue = event.target.value.replace(/,/g, ''); // Remove commas for parsing
+    const regex = getRegexForDecimals(selectedAsset?.exponent ?? 6);
+
+    if (regex.test(inputValue) || inputValue === '') {
+      setLocalInputValue(event.target.value); // Keep the user input if it matches the regex
+      const value = parseFloat(inputValue);
+
+      if (!isNaN(value)) {
+        onAmountValueChange(value); // Send the numeric value to the parent
+      } else {
+        onAmountValueChange(0); // Reset to 0 if the input is invalid
+      }
+    }
+  };
+
+  // Handle formatting the input when the user finishes typing (on blur)
+  const handleBlur = () => {
+    const value = parseFloat(localInputValue.replace(/,/g, ''));
+    if (!isNaN(value)) {
+      setLocalInputValue(formatNumberWithCommas(value)); // Format the input with commas on blur
+    }
   };
 
   return (
@@ -107,14 +143,16 @@ export const SwapCard = (props: SwapCardProps) => {
           </SelectContent>
         </Select>
         <Input
+          ref={inputRef} // Reference to the input to control cursor position
           lang="en"
-          step="1"
+          step={selectedAsset?.exponent ?? 6}
           className="bg-black backdrop-blur-xl"
-          type="text" // Text to allow displaying commas
+          type="text"
           placeholder="amount"
-          value={formattedAmount}
-          disabled={!amountInputEnabled} // Disable input if no asset is selected
+          value={localInputValue} // Display formatted input from local state
+          disabled={!amountInputEnabled}
           onChange={handleAmountChange}
+          onBlur={handleBlur} // Format the input when the user leaves the input field
         />
         <Input
           className="bg-black backdrop-blur-xl"
