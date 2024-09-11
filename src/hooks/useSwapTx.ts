@@ -1,10 +1,10 @@
 import { Coin } from '@cosmjs/amino';
-import { isDeliverTxSuccess } from '@cosmjs/stargate';
+import { DeliverTxResponse, isDeliverTxSuccess } from '@cosmjs/stargate';
 import { useChain } from '@cosmos-kit/react';
 import { getSigningOsmosisClient, osmosis } from '@orchestra-labs/symphonyjs';
-
-import { useToast } from '@/hooks/useToast';
 import { truncateString } from '@/sections';
+import { wrapPromiseWithTimeout } from '@/helpers/timeout';
+import { useToast } from '@/hooks/useToast';
 
 const { swapSend } = osmosis.market.v1beta1.MessageComposer.withTypeUrl;
 
@@ -69,13 +69,18 @@ export const useSwapTx = (chainName: string) => {
         description: 'Waiting for transaction to be included in the block',
       });
 
-      const response = await client.signAndBroadcast(
+      const signAndBroadcastPromise = client.signAndBroadcast(
         signerAddress!,
         [swapMsg],
         {
           amount: [{ denom: 'note', amount: '1000000' }],
           gas: '100000',
         },
+      );
+      const response = await wrapPromiseWithTimeout<DeliverTxResponse>(
+        signAndBroadcastPromise,
+        20000,
+        new Error('Approval timeout exceeded, please try again'),
       );
 
       txToastProgress.dismiss();
