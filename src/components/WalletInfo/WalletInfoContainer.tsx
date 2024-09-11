@@ -1,7 +1,7 @@
 import { useChain } from '@cosmos-kit/react';
 import { CircleDollarSign } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
-import { defaultChainName, walletPrefix } from '@/constants';
+import { defaultChainName, IBCPrefix, walletPrefix } from '@/constants';
 import { useToast, useWalletAssets } from '@/hooks';
 import { Asset, SendAssetAtom, truncateString } from '@/sections';
 import { useSetAtom } from 'jotai';
@@ -45,7 +45,9 @@ const AssetRow = (asset: Asset) => {
           <CircleDollarSign className="h-6 w-6" />
         )}
       </TableCell>
-      <TableCell className="font-medium w-[30%] truncate">{symbol}</TableCell>
+      <TableCell className="font-medium w-[30%] truncate">
+        {truncateString(IBCPrefix, symbol || '')}
+      </TableCell>
       <TableCell className="w-[25%] text-right truncate">
         {normalizedAmount.toLocaleString('en-US', {
           maximumFractionDigits: exponent,
