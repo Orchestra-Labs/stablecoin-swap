@@ -10,11 +10,12 @@ import {
 } from '../Select';
 import { Card, CardContent, CardHeader, CardTitle } from '../Card';
 import { Input } from '../Input';
+import { CircleDollarSign } from 'lucide-react';
 
 export type SwapCardProps = {
   title: string;
   selectPlaceholder: string;
-  options: { [key: string]: string };
+  options: { [key: string]: { label: string; logo?: string } };
   amountValue: number;
   selectedAsset: Asset | null;
   onAssetValueChange: (value: string) => void;
@@ -24,11 +25,19 @@ export type SwapCardProps = {
   addressInputEnabled?: boolean;
 };
 
-const Option = (props: { value: string; label: string }) => {
-  const { value, label } = props;
+const Option = (props: { value: string; label: string; logo?: string }) => {
+  const { value, label, logo } = props;
+
   return (
     <SelectItem key={value} value={value}>
-      {label}
+      <div className="flex items-center gap-2">
+        {logo ? (
+          <img src={logo} alt={`${label} logo`} className="w-6 h-6" />
+        ) : (
+          <CircleDollarSign className="h-6 w-6 text-white" />
+        )}
+        <span>{label}</span>
+      </div>
     </SelectItem>
   );
 };
@@ -87,7 +96,12 @@ export const SwapCard = (props: SwapCardProps) => {
           <SelectContent className="bg-black backdrop-blur-xl">
             <SelectGroup>
               {Object.keys(options).map(option => (
-                <Option key={option} value={option} label={options[option]} />
+                <Option
+                  key={option}
+                  value={option}
+                  label={options[option].label}
+                  logo={options[option].logo}
+                />
               ))}
             </SelectGroup>
           </SelectContent>

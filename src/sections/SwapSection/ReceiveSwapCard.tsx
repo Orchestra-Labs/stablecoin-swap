@@ -50,11 +50,21 @@ export const ReceiveSwapCard = () => {
     <SwapCard
       title="Receive"
       selectPlaceholder="Select asset to receive"
-      options={Object.assign(
-        {},
-        ...crossReferencedAssets.map(x => ({
-          [x.denom]: truncateString(IBCPrefix, x.symbol ? x.symbol : x.denom),
-        })),
+      options={crossReferencedAssets.reduce(
+        (acc, asset) => {
+          acc[asset.denom] = {
+            value: asset.denom,
+            label: truncateString(
+              IBCPrefix,
+              asset.symbol ? asset.symbol : asset.denom,
+            ),
+            logo: asset.logo,
+          };
+          return acc;
+        },
+        {} as {
+          [key: string]: { value: string; label: string; logo?: string };
+        },
       )}
       amountValue={receiveAmount}
       onAssetValueChange={onAssetValueChange}

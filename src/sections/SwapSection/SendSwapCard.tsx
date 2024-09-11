@@ -27,11 +27,21 @@ export const SendSwapCard = () => {
     <SwapCard
       title="Send"
       selectPlaceholder="Select asset to send"
-      options={Object.assign(
-        {},
-        ...walletAssets.map(x => ({
-          [x.denom]: truncateString(IBCPrefix, x.symbol ? x.symbol : x.denom),
-        })),
+      options={walletAssets.reduce(
+        (acc, asset) => {
+          acc[asset.denom] = {
+            value: asset.denom,
+            label: truncateString(
+              IBCPrefix,
+              asset.symbol ? asset.symbol : asset.denom,
+            ),
+            logo: asset.logo,
+          };
+          return acc;
+        },
+        {} as {
+          [key: string]: { value: string; label: string; logo?: string };
+        },
       )}
       amountValue={sendAmount}
       selectedAsset={sendAsset || null}
