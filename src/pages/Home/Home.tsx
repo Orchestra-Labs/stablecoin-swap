@@ -9,7 +9,6 @@ import { SwapSection } from '@/sections';
 export const Home = () => {
   const { isWalletConnected, connect } = useChain(defaultChainName);
 
-  console.log('isWalletConnected', isWalletConnected);
   useEffect(() => {
     if (isWalletConnected) {
       setTimeout(() => {

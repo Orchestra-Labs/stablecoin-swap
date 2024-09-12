@@ -2,7 +2,12 @@ import { useChain } from '@cosmos-kit/react';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { defaultChainName, localAssetRegistry, rpcUrl } from '@/constants';
+import {
+  defaultChainName,
+  IBCPrefix,
+  localAssetRegistry,
+  rpcUrl,
+} from '@/constants';
 
 import { useAsset } from './useAsset';
 
@@ -39,37 +44,40 @@ export function useWalletAssets() {
       if (!walletAddress) throw new Error('Wallet address is required');
       const client = await getStargateClient();
       const coins = await client.getAllBalances(walletAddress);
-      return coins.map(coin => {
-        let symbol: string;
-        let logo: string | undefined;
-        let exponent: number;
-        const registryAsset = find(coin.denom);
-        if (!registryAsset) {
-          symbol =
-            localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
-              ?.symbol ?? coin.denom;
-          exponent =
-            localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
-              ?.exponent ?? 0;
-          logo =
-            localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
-              ?.logo;
-        } else {
-          symbol = registryAsset.symbol;
-          exponent =
-            localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
-              ?.exponent ?? 0;
-          logo = registryAsset.logo_URIs?.png ?? registryAsset.logo_URIs?.jpeg;
-        }
-        return {
-          symbol: symbol ?? coin.denom,
-          exponent: exponent ?? 0,
-          denom: coin.denom,
-          amount: coin.amount,
-          isIbc: coin.denom.startsWith('ibc/'),
-          logo,
-        };
-      });
+      return coins
+        .map(coin => {
+          let symbol: string;
+          let logo: string | undefined;
+          let exponent: number;
+          const registryAsset = find(coin.denom);
+          if (!registryAsset) {
+            symbol =
+              localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
+                ?.symbol ?? coin.denom;
+            exponent =
+              localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
+                ?.exponent ?? 0;
+            logo =
+              localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
+                ?.logo;
+          } else {
+            symbol = registryAsset.symbol;
+            exponent =
+              localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
+                ?.exponent ?? 0;
+            logo =
+              registryAsset.logo_URIs?.png ?? registryAsset.logo_URIs?.jpeg;
+          }
+          return {
+            symbol: symbol ?? coin.denom,
+            exponent: exponent ?? 0,
+            denom: coin.denom,
+            amount: coin.amount,
+            isIbc: coin.denom.startsWith(IBCPrefix),
+            logo,
+          };
+        })
+        .filter(coin => !coin.isIbc);
     },
   });
 
@@ -126,7 +134,6 @@ export function useWalletAssets() {
   }, [allQueries, isLoading]);
 
   const refetch = () => {
-    console.log('refresh wallet');
     updatableQueriesAfterMutation.forEach(query => query.refetch());
   };
 

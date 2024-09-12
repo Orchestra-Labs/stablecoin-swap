@@ -19,8 +19,6 @@ export function useExchangeRate() {
   const receiveAsset = useAtomValue(ReceiveAssetAtom)?.denom || '';
   const { getRestEndpoint } = useChain(defaultChainName);
 
-  console.log('assets change calculate exchange', sendAsset, receiveAsset);
-
   const queryExchangeRate = useQuery<string | null, Error, string | null>({
     queryKey: ['exchangeRate', sendAsset, receiveAsset],
     queryFn: async ({ queryKey }): Promise<string | null> => {
@@ -52,8 +50,6 @@ export function useExchangeRate() {
     }
     return 0;
   }, [queryExchangeRate.data]);
-
-  console.log('exchange rate:', exchangeRate);
 
   return {
     isLoading: queryExchangeRate.isLoading,

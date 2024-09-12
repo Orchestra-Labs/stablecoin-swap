@@ -16,12 +16,12 @@ import { SendAmountAtom, SendAssetAtom, WalletAssetsAtom } from './atoms';
 export const ReceiveSwapCard = () => {
   const [receiveAsset, setReceiveAsset] = useAtom(ReceiveAssetAtom);
   const [receiveAmount, setReceiveAmount] = useAtom(ReceiveAmountAtom);
-  const [isReceiveUpdate, setIsReceiveUpdate] = useState(false); // Track Receive updates
+  const [isReceiveUpdate, setIsReceiveUpdate] = useState(false);
 
   const [sendAmount, setSendAmount] = useAtom(SendAmountAtom);
   const sendAsset = useAtomValue(SendAssetAtom);
   const walletAssets = useAtomValue(WalletAssetsAtom);
-  const { exchangeRate } = useExchangeRate(); // Use exchange rate hook
+  const { exchangeRate } = useExchangeRate();
 
   const { assets } = useOracleAssets();
   const { address } = useChain(defaultChainName);
@@ -60,36 +60,43 @@ export const ReceiveSwapCard = () => {
   // UseEffect to recalculate the receive amount based on the updated receive asset and exchange rate
   useEffect(() => {
     if (receiveAsset && exchangeRate && sendAsset) {
-      // Check if sendAsset and receiveAsset are the same (1:1 exchange)
       if (receiveAsset.denom === sendAsset.denom) {
-        setReceiveAmount(sendAmount); // 1:1 exchange rate
+        setReceiveAmount(sendAmount);
       } else {
-        const newReceiveAmount = sendAmount * exchangeRate; // Perform the multiplication with parsed value
-        setReceiveAmount(newReceiveAmount); // Update the receive amount based on the new asset
+        let newReceiveAmount = sendAmount * exchangeRate;
+
+        const exponent = receiveAsset.exponent || 6;
+        newReceiveAmount = parseFloat(newReceiveAmount.toFixed(exponent));
+
+        setReceiveAmount(newReceiveAmount);
       }
     }
-  }, [receiveAsset, exchangeRate, sendAsset, sendAmount]); // Add sendAmount to dependency
+  }, [receiveAsset, exchangeRate, sendAsset, sendAmount]);
 
   // Recalculate send amount when receive amount is updated, but not when the receive asset changes
   useEffect(() => {
     if (isReceiveUpdate && sendAsset) {
-      const amount = parseFloat(sendAsset?.amount || '0'); // Ensure `sendAsset.amount` is a number
+      const amount = parseFloat(sendAsset?.amount || '0');
       const exponent = sendAsset?.exponent || 6;
       const maxAvailable = amount / 10 ** exponent;
 
       if (receiveAmount === 0) {
-        setSendAmount(0); // Set send amount to 0 if receive is 0
+        setSendAmount(0);
       } else if (exchangeRate) {
-        const newSendAmount = receiveAmount / exchangeRate;
+        let newSendAmount = receiveAmount / exchangeRate;
+
+        newSendAmount = parseFloat(newSendAmount.toFixed(exponent));
 
         if (newSendAmount > maxAvailable) {
-          setSendAmount(maxAvailable); // Cap send amount to max available
-          setReceiveAmount(maxAvailable * exchangeRate); // Recompute receive amount
+          setSendAmount(maxAvailable);
+          setReceiveAmount(
+            parseFloat((maxAvailable * exchangeRate).toFixed(exponent)),
+          );
         } else {
-          setSendAmount(newSendAmount); // Update send amount
+          setSendAmount(newSendAmount);
         }
       }
-      setIsReceiveUpdate(false); // Reset flag after update
+      setIsReceiveUpdate(false);
     }
   }, [receiveAmount, exchangeRate, sendAsset, walletAssets]);
 

@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState, useRef } from 'react';
 import { Asset } from '@/sections';
 import {
   Select,
@@ -44,6 +44,9 @@ const Option = (props: { value: string; label: string; logo?: string }) => {
 
 export const SwapCard = (props: SwapCardProps) => {
   const [localSelectedValue, setLocalSelectedValue] = useState<string>('');
+  const [localInputValue, setLocalInputValue] = useState<string>('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const prevValueRef = useRef<string>('');
 
   const {
     title,
@@ -64,17 +67,127 @@ export const SwapCard = (props: SwapCardProps) => {
     }
   }, [selectedAsset, localSelectedValue]);
 
-  // Disable amount input until an asset is selected
+  // Effect to update local input value whenever the parent updates amountValue
+  useEffect(() => {
+    if (!isNaN(amountValue) && amountValue !== null) {
+      setLocalInputValue(formatNumberWithCommas(amountValue || 0));
+    } else {
+      setLocalInputValue('0.0');
+    }
+  }, [amountValue]);
+
+  // Disable input until asset is selected
   const amountInputEnabled = !!localSelectedValue;
 
-  // Use selectedAsset.exponent for maximumFractionDigits or default to 6
-  const formattedAmount = new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: selectedAsset?.exponent || 6,
-  }).format(amountValue);
+  // Format the number with commas
+  const formatNumberWithCommas = (value: string | number): string => {
+    const stringValue = String(value);
+    const [integerPart, decimalPart] = stringValue.split('.') || ['', ''];
+    const formattedIntegerPart = integerPart.replace(
+      /\B(?=(\d{3})+(?!\d))/g,
+      ',',
+    );
 
+    return decimalPart !== undefined
+      ? `${formattedIntegerPart}.${decimalPart}`
+      : formattedIntegerPart;
+  };
+
+  // Helper function to remove all non-numeric characters (except decimal points)
+  const stripNonNumerics = (value: string) => {
+    return value.replace(/[^\d.]/g, '');
+  };
+
+  // Validate numberic input and restrict to selectedAsset.exponent decimal places
+  const getRegexForDecimals = (exponent: number) => {
+    return new RegExp(`^\\d*\\.?\\d{0,${exponent}}$`);
+  };
+
+  // Handle user input change, strip non-numerics, add the new character, and reformat
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(event.target.value.replace(/,/g, '') || '0');
-    onAmountValueChange(value);
+    const inputValue = event.target.value;
+    const caretPosition = event.target.selectionStart || 0;
+    const regex = getRegexForDecimals(selectedAsset?.exponent ?? 6);
+
+    // Remove commas and non-numeric characters for accurate processing
+    const rawValue = stripNonNumerics(inputValue);
+
+    // Split the input into the integer and decimal parts
+    const [integerPart, decimalPart] = rawValue.split('.');
+
+    // Check if decimal part exceeds 6 digits and truncate if necessary
+    let processedValue = rawValue;
+    if (decimalPart && decimalPart.length > 6) {
+      processedValue = `${integerPart}.${decimalPart.slice(0, 6)}`;
+    }
+
+    const numericValue = parseFloat(processedValue);
+    if (!isNaN(numericValue) || !regex.test(inputValue) || inputValue === '') {
+      onAmountValueChange(numericValue);
+    } else {
+      onAmountValueChange(0);
+    }
+
+    // Update the input with the formatted value
+    const formattedValue = formatNumberWithCommas(processedValue || 0);
+    setLocalInputValue(formattedValue);
+
+    const previousRawValue = stripNonNumerics(prevValueRef.current);
+    const previousFormattedValue = formatNumberWithCommas(
+      parseFloat(previousRawValue),
+    );
+
+    // Reposition the caret
+    setTimeout(() => {
+      if (inputRef.current) {
+        // Compare the previous value with the new one to determine if it's an addition or removal
+        let characterWasAdded = false;
+
+        if (rawValue.length > previousRawValue.length) {
+          characterWasAdded = true;
+        } else if (rawValue.length < previousRawValue.length) {
+          characterWasAdded = false;
+        } else {
+          characterWasAdded = false;
+        }
+
+        let newCaretPosition = caretPosition;
+        if (characterWasAdded) {
+          if (formattedValue.length - rawValue.length > 1) {
+            newCaretPosition += 1;
+          } else if (
+            rawValue.length > previousFormattedValue.length &&
+            formattedValue.length !== rawValue.length
+          ) {
+            newCaretPosition += 1;
+          }
+        } else if (!characterWasAdded) {
+          if (previousFormattedValue.length - formattedValue.length > 1) {
+            newCaretPosition -= 1;
+          } else if (formattedValue.length === previousRawValue.length) {
+          }
+        }
+
+        prevValueRef.current = processedValue;
+
+        // Ensure caret assignment happens after the DOM is updated
+        setTimeout(() => {
+          inputRef.current?.setSelectionRange(
+            newCaretPosition,
+            newCaretPosition,
+          );
+        }, 0);
+      }
+    }, 0);
+  };
+
+  // Handle formatting the input when the user finishes typing (on blur)
+  const handleBlur = () => {
+    const value = parseFloat(stripNonNumerics(localInputValue));
+
+    if (!isNaN(value)) {
+      setLocalInputValue(formatNumberWithCommas(value));
+    }
   };
 
   return (
@@ -107,19 +220,22 @@ export const SwapCard = (props: SwapCardProps) => {
           </SelectContent>
         </Select>
         <Input
+          ref={inputRef}
           lang="en"
-          step="1"
+          step={selectedAsset?.exponent ?? 6}
           className="bg-black backdrop-blur-xl"
-          type="text" // Text to allow displaying commas
-          placeholder="amount"
-          value={formattedAmount}
-          disabled={!amountInputEnabled} // Disable input if no asset is selected
+          type="text"
+          placeholder="0.0"
+          value={localInputValue || '0.0'}
+          disabled={!amountInputEnabled}
           onChange={handleAmountChange}
+          onBlur={handleBlur}
         />
         <Input
           className="bg-black backdrop-blur-xl"
           value={address}
           disabled={!addressInputEnabled}
+          onChange={() => {}}
         />
       </CardContent>
     </Card>
