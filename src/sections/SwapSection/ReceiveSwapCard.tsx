@@ -60,15 +60,18 @@ export const ReceiveSwapCard = () => {
   // UseEffect to recalculate the receive amount based on the updated receive asset and exchange rate
   useEffect(() => {
     if (receiveAsset && exchangeRate && sendAsset) {
-      // Check if sendAsset and receiveAsset are the same (1:1 exchange)
       if (receiveAsset.denom === sendAsset.denom) {
-        setReceiveAmount(sendAmount); // 1:1 exchange rate
+        setReceiveAmount(sendAmount);
       } else {
-        const newReceiveAmount = sendAmount * exchangeRate; // Perform the multiplication with parsed value
-        setReceiveAmount(newReceiveAmount); // Update the receive amount based on the new asset
+        let newReceiveAmount = sendAmount * exchangeRate;
+
+        const exponent = receiveAsset.exponent || 6;
+        newReceiveAmount = parseFloat(newReceiveAmount.toFixed(exponent));
+
+        setReceiveAmount(newReceiveAmount);
       }
     }
-  }, [receiveAsset, exchangeRate, sendAsset, sendAmount]); // Add sendAmount to dependency
+  }, [receiveAsset, exchangeRate, sendAsset, sendAmount]);
 
   // Recalculate send amount when receive amount is updated, but not when the receive asset changes
   useEffect(() => {
