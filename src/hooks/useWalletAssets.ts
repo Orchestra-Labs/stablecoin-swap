@@ -126,7 +126,6 @@ export function useWalletAssets() {
   }, [allQueries, isLoading]);
 
   const refetch = () => {
-    console.log('refresh wallet');
     updatableQueriesAfterMutation.forEach(query => query.refetch());
   };
 
