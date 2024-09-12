@@ -45,16 +45,13 @@ const AssetRow = (asset: Asset) => {
           <CircleDollarSign className="h-6 w-6" />
         )}
       </TableCell>
-      <TableCell className="font-medium w-[30%] truncate">
+      <TableCell className="font-medium w-[40%] truncate">
         {truncateString(IBCPrefix, symbol || '')}
       </TableCell>
-      <TableCell className="w-[25%] text-right truncate">
+      <TableCell className="w-[40%] text-right truncate">
         {normalizedAmount.toLocaleString('en-US', {
           maximumFractionDigits: exponent,
         })}
-      </TableCell>
-      <TableCell className="w-[25%] text-right truncate">
-        {isIbc ? 'ibc' : 'Native Token'}
       </TableCell>
     </TableRow>
   );
@@ -117,7 +114,7 @@ export const WalletInfoContainer = () => {
   };
 
   return (
-    <Card className="w-full max-w-[500px] bg-black backdrop-blur-xl">
+    <Card className="w-full max-w-[400px] bg-black backdrop-blur-xl">
       <CardHeader>
         <CardTitle>Wallet: {username}</CardTitle>
         <CardDescription

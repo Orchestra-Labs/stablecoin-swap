@@ -69,8 +69,10 @@ export const SwapCard = (props: SwapCardProps) => {
 
   // Effect to update local input value whenever the parent updates amountValue
   useEffect(() => {
-    if (!isNaN(amountValue)) {
-      setLocalInputValue(formatNumberWithCommas(amountValue)); // Reflect the formatted amountValue from the parent
+    if (!isNaN(amountValue) && amountValue !== null) {
+      setLocalInputValue(formatNumberWithCommas(amountValue || 0)); // Default to 0 if no value is set
+    } else {
+      setLocalInputValue('0.0'); // Set to 0.0 initially
     }
   }, [amountValue]);
 
@@ -78,10 +80,17 @@ export const SwapCard = (props: SwapCardProps) => {
   const amountInputEnabled = !!localSelectedValue;
 
   // Function to format the number with commas
-  const formatNumberWithCommas = (value: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      maximumFractionDigits: selectedAsset?.exponent || 6,
-    }).format(value);
+  const formatNumberWithCommas = (value: string | number): string => {
+    const stringValue = String(value);
+    const [integerPart, decimalPart] = stringValue.split('.') || ['', ''];
+    const formattedIntegerPart = integerPart.replace(
+      /\B(?=(\d{3})+(?!\d))/g,
+      ',',
+    );
+
+    return decimalPart !== undefined
+      ? `${formattedIntegerPart}.${decimalPart}`
+      : formattedIntegerPart;
   };
 
   // Helper function to remove all non-numeric characters (except decimal points)
@@ -89,101 +98,80 @@ export const SwapCard = (props: SwapCardProps) => {
     return value.replace(/[^\d.]/g, ''); // Remove everything except digits and the decimal point
   };
 
+  // Regex to validate number input and restrict to selectedAsset.exponent decimal places
+  const getRegexForDecimals = (exponent: number) => {
+    return new RegExp(`^\\d*\\.?\\d{0,${exponent}}$`); // Allows digits and at most `exponent` decimals
+  };
+
   // Handle user input change, strip non-numerics, add the new character, and reformat
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
+    console.log('input', inputValue);
     const caretPosition = event.target.selectionStart || 0;
+    const regex = getRegexForDecimals(selectedAsset?.exponent ?? 6);
 
     // Remove commas and non-numeric characters for accurate processing
     const rawValue = stripNonNumerics(inputValue);
+    console.log('raw', rawValue);
 
-    // Update local state temporarily without formatting
-    setLocalInputValue(rawValue);
+    // Split the input into the integer and decimal parts
+    const [integerPart, decimalPart] = rawValue.split('.');
 
-    const numericValue = parseFloat(rawValue);
-    if (!isNaN(numericValue)) {
+    // Check if decimal part exceeds 6 digits and truncate if necessary
+    let processedValue = rawValue;
+    if (decimalPart && decimalPart.length > 6) {
+      processedValue = `${integerPart}.${decimalPart.slice(0, 6)}`;
+    }
+
+    const numericValue = parseFloat(processedValue);
+    console.log('numeric', numericValue);
+    if (!isNaN(numericValue) || !regex.test(inputValue) || inputValue === '') {
       onAmountValueChange(numericValue); // Propagate the numeric value to the parent
     } else {
       onAmountValueChange(0);
     }
 
+    const formattedValue = formatNumberWithCommas(processedValue || 0);
+    setLocalInputValue(formattedValue); // Update the input with the formatted value
+
+    const previousRawValue = stripNonNumerics(prevValueRef.current);
+    const previousFormattedValue = formatNumberWithCommas(
+      parseFloat(previousRawValue),
+    );
+
     // Reapply formatting and reposition the caret
     setTimeout(() => {
       if (inputRef.current) {
-        const previousRawValue = stripNonNumerics(prevValueRef.current);
-        const formattedValue = formatNumberWithCommas(numericValue || 0);
-        const previousFormattedValue = formatNumberWithCommas(
-          parseFloat(previousRawValue),
-        );
-        setLocalInputValue(formattedValue); // Update the input with the formatted value
-
         // Compare the previous value with the new one to determine if it's an addition or removal
         let characterWasAdded = false;
-        console.log(
-          'input',
-          inputValue,
-          'raw',
-          rawValue,
-          'previous value',
-          previousRawValue,
-        );
-        // console.log(
-        //   'input length',
-        //   rawValue.length,
-        //   'previous value length',
-        //   previousRawValue.length,
-        // );
+
         if (rawValue.length > previousRawValue.length) {
-          // console.log('Addition detected:', rawValue[caretPosition - 1]);
           characterWasAdded = true;
         } else if (rawValue.length < previousRawValue.length) {
-          // console.log('Removal detected:', previousRawValue[caretPosition - 1]);
           characterWasAdded = false;
         } else {
-          // console.log('No change detected');
           characterWasAdded = false;
         }
 
-        console.log('input', rawValue, 'position', caretPosition - 1);
-        console.log(
-          'formatted length',
-          formattedValue.length,
-          'raw length',
-          rawValue.length,
-          'previous raw length',
-          previousRawValue.length,
-          'previous formatted length',
-          previousFormattedValue.length,
-        );
-        console.log('formatted', formattedValue, 'raw', rawValue);
         let newCaretPosition = caretPosition;
         if (characterWasAdded) {
-          console.log('checking character addition scenarios');
           if (formattedValue.length - rawValue.length > 1) {
             newCaretPosition += 1;
-            console.log('formatted greatly exceeds raw, adding 1 to index');
           } else if (
             rawValue.length > previousFormattedValue.length &&
             formattedValue.length !== rawValue.length
           ) {
             newCaretPosition += 1;
-            console.log('raw exceeds formatted previous, adding 1 to index');
           }
         } else if (!characterWasAdded) {
           console.log('checking character removal scenarios');
           if (previousFormattedValue.length - formattedValue.length > 1) {
             newCaretPosition -= 1;
-            console.log(
-              'previous formatted greatly exceeds formatted, removing 1 from index',
-            );
           } else if (formattedValue.length === previousRawValue.length) {
-            console.log('formatted matches previous raw, taking no action');
-          } else {
-            console.log('raw is equal, taking no action');
           }
         }
 
-        prevValueRef.current = inputValue;
+        prevValueRef.current = processedValue;
 
         // Ensure caret assignment happens after the DOM is updated
         setTimeout(() => {
@@ -199,6 +187,7 @@ export const SwapCard = (props: SwapCardProps) => {
   // Handle formatting the input when the user finishes typing (on blur)
   const handleBlur = () => {
     const value = parseFloat(stripNonNumerics(localInputValue));
+
     if (!isNaN(value)) {
       setLocalInputValue(formatNumberWithCommas(value)); // Format the input with commas on blur
     }
@@ -240,15 +229,16 @@ export const SwapCard = (props: SwapCardProps) => {
           className="bg-black backdrop-blur-xl"
           type="text"
           placeholder="0.0"
-          value={localInputValue} // Display formatted input from local state
+          value={localInputValue || '0.0'}
           disabled={!amountInputEnabled}
           onChange={handleAmountChange}
-          onBlur={handleBlur} // Format the input when the user leaves the input field
+          onBlur={handleBlur}
         />
         <Input
           className="bg-black backdrop-blur-xl"
           value={address}
           disabled={!addressInputEnabled}
+          onChange={() => {}}
         />
       </CardContent>
     </Card>
