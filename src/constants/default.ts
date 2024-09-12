@@ -4,6 +4,8 @@ export const rpcUrl = 'https://symphony-api.kleomedes.network';
 export const defaultChainName = 'symphonytestnet';
 export const walletPrefix = 'symphony1';
 export const IBCPrefix = 'ibc/';
+export const lesserExponentDefault = 0;
+export const greaterExponentDefault = 6;
 export const chainEndpoint = {
   symphonytestnet: {
     rpc: [' https://symphony-rpc.kleomedes.network'],

@@ -1,13 +1,15 @@
 import { useAtomValue } from 'jotai';
-
 import { useExchangeRate } from '@/hooks';
 import { calculateReceiveAmount } from '../utils/swapCalculation';
 import BigNumber from 'bignumber.js';
-import { SendAmountAtom } from '../atoms';
+import { SendStateAtom } from '../atoms';
 
 export const useReceiveAmount = () => {
   const { exchangeRate, isLoading, error } = useExchangeRate();
-  const sendAmount = useAtomValue(SendAmountAtom);
+
+  // Use the combined send state atom to get the send amount
+  const sendState = useAtomValue(SendStateAtom);
+  const sendAmount = sendState.amount;
 
   const receiveAmount = calculateReceiveAmount(
     sendAmount,
@@ -15,7 +17,7 @@ export const useReceiveAmount = () => {
   ).toNumber();
 
   return {
-    receiveAmount: receiveAmount,
+    receiveAmount,
     isLoading,
     error,
   };

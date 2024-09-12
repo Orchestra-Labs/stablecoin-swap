@@ -5,7 +5,7 @@ import { useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 
 import { defaultChainName } from '@/constants';
-import { ReceiveAssetAtom, SendAssetAtom } from '@/sections';
+import { SendStateAtom, ReceiveStateAtom } from '@/sections/SwapSection/atoms';
 
 interface ExchangeRateResponse {
   return_coin: {
@@ -15,8 +15,12 @@ interface ExchangeRateResponse {
 }
 
 export function useExchangeRate() {
-  const sendAsset = useAtomValue(SendAssetAtom)?.denom || '';
-  const receiveAsset = useAtomValue(ReceiveAssetAtom)?.denom || '';
+  // Use the combined SendStateAtom and ReceiveStateAtom
+  const sendState = useAtomValue(SendStateAtom);
+  const receiveState = useAtomValue(ReceiveStateAtom);
+
+  const sendAsset = sendState.asset?.denom || '';
+  const receiveAsset = receiveState.asset?.denom || '';
   const { getRestEndpoint } = useChain(defaultChainName);
 
   const queryExchangeRate = useQuery<string | null, Error, string | null>({
@@ -46,7 +50,7 @@ export function useExchangeRate() {
       // Use BigNumber for precise decimal arithmetic
       return new BigNumber(queryExchangeRate.data)
         .dividedBy(1000000)
-        .toNumber(); // Return as string with 6 decimal places
+        .toNumber();
     }
     return 0;
   }, [queryExchangeRate.data]);

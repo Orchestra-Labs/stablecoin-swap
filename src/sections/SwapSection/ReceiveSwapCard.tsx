@@ -1,28 +1,28 @@
 import { useChain } from '@cosmos-kit/react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
 import { SwapCard } from '@/components/Swap';
-import { defaultChainName, IBCPrefix, localAssetRegistry } from '@/constants';
-import { useOracleAssets } from '@/hooks';
 import {
-  Asset,
-  ReceiveAssetAtom,
-  truncateString,
-  ReceiveAmountAtom,
-} from '@/sections';
-import { useExchangeRate } from '@/hooks/useExchangeRate';
-import { SendAmountAtom, SendAssetAtom, WalletAssetsAtom } from './atoms';
+  defaultChainName,
+  greaterExponentDefault,
+  IBCPrefix,
+  localAssetRegistry,
+} from '@/constants';
+import { useOracleAssets } from '@/hooks';
+import { Asset, truncateString } from '@/sections';
+import { ReceiveStateAtom } from './atoms';
 
-export const ReceiveSwapCard = () => {
-  const [receiveAsset, setReceiveAsset] = useAtom(ReceiveAssetAtom);
-  const [receiveAmount, setReceiveAmount] = useAtom(ReceiveAmountAtom);
-  const [isReceiveUpdate, setIsReceiveUpdate] = useState(false);
-
-  const [sendAmount, setSendAmount] = useAtom(SendAmountAtom);
-  const sendAsset = useAtomValue(SendAssetAtom);
-  const walletAssets = useAtomValue(WalletAssetsAtom);
-  const { exchangeRate } = useExchangeRate();
-
+export const ReceiveSwapCard = ({
+  updateReceiveAsset,
+  updateReceiveAmount,
+}: {
+  updateReceiveAsset: (newAsset: Asset, propagateChanges?: boolean) => void;
+  updateReceiveAmount: (
+    newReceiveAmount: number,
+    propagateChanges?: boolean,
+  ) => void;
+}) => {
+  const receiveState = useAtomValue(ReceiveStateAtom);
   const { assets } = useOracleAssets();
   const { address } = useChain(defaultChainName);
 
@@ -42,8 +42,9 @@ export const ReceiveSwapCard = () => {
 
   // Handle change in receive amount
   const onAmountValueChange = (value: number) => {
-    setIsReceiveUpdate(true);
-    setReceiveAmount(value);
+    const exponent = receiveState.asset?.exponent ?? greaterExponentDefault;
+    const roundedValue = parseFloat(value.toFixed(exponent));
+    updateReceiveAmount(roundedValue, true); // Propagate the change
   };
 
   // Handle change in receive asset
@@ -51,54 +52,10 @@ export const ReceiveSwapCard = () => {
     const selectedAsset = crossReferencedAssets.find(
       asset => asset.denom === denom,
     );
-
     if (selectedAsset) {
-      setReceiveAsset(selectedAsset);
+      updateReceiveAsset(selectedAsset, true); // Propagate the change
     }
   };
-
-  // UseEffect to recalculate the receive amount based on the updated receive asset and exchange rate
-  useEffect(() => {
-    if (receiveAsset && exchangeRate && sendAsset) {
-      if (receiveAsset.denom === sendAsset.denom) {
-        setReceiveAmount(sendAmount);
-      } else {
-        let newReceiveAmount = sendAmount * exchangeRate;
-
-        const exponent = receiveAsset.exponent || 6;
-        newReceiveAmount = parseFloat(newReceiveAmount.toFixed(exponent));
-
-        setReceiveAmount(newReceiveAmount);
-      }
-    }
-  }, [receiveAsset, exchangeRate, sendAsset, sendAmount]);
-
-  // Recalculate send amount when receive amount is updated, but not when the receive asset changes
-  useEffect(() => {
-    if (isReceiveUpdate && sendAsset) {
-      const amount = parseFloat(sendAsset?.amount || '0');
-      const exponent = sendAsset?.exponent || 6;
-      const maxAvailable = amount / 10 ** exponent;
-
-      if (receiveAmount === 0) {
-        setSendAmount(0);
-      } else if (exchangeRate) {
-        let newSendAmount = receiveAmount / exchangeRate;
-
-        newSendAmount = parseFloat(newSendAmount.toFixed(exponent));
-
-        if (newSendAmount > maxAvailable) {
-          setSendAmount(maxAvailable);
-          setReceiveAmount(
-            parseFloat((maxAvailable * exchangeRate).toFixed(exponent)),
-          );
-        } else {
-          setSendAmount(newSendAmount);
-        }
-      }
-      setIsReceiveUpdate(false);
-    }
-  }, [receiveAmount, exchangeRate, sendAsset, walletAssets]);
 
   return (
     <SwapCard
@@ -120,12 +77,12 @@ export const ReceiveSwapCard = () => {
           [key: string]: { value: string; label: string; logo?: string };
         },
       )}
-      amountValue={receiveAmount}
+      amountValue={receiveState.amount}
       onAssetValueChange={onAssetValueChange}
       onAmountValueChange={onAmountValueChange}
-      amountInputEnabled={false}
+      amountInputEnabled={true}
       address={address ?? ''}
-      selectedAsset={receiveAsset || null}
+      selectedAsset={receiveState.asset || null}
     />
   );
 };

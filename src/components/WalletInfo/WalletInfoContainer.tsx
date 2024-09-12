@@ -3,8 +3,7 @@ import { CircleDollarSign } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import { defaultChainName, IBCPrefix, walletPrefix } from '@/constants';
 import { useToast, useWalletAssets } from '@/hooks';
-import { Asset, SendAssetAtom, truncateString } from '@/sections';
-import { useSetAtom } from 'jotai';
+import { Asset, truncateString } from '@/sections';
 import {
   Card,
   CardContent,
@@ -14,22 +13,19 @@ import {
 } from '../Card';
 import { Table, TableBody, TableCell, TableRow } from '../Table';
 
-const AssetRow = (asset: Asset) => {
-  const { denom, amount, isIbc, logo, exponent = 6, symbol } = asset;
+const AssetRow = ({
+  asset,
+  onRowClick,
+}: {
+  asset: Asset;
+  onRowClick: (asset: Asset) => void;
+}) => {
+  const { denom, amount, logo, exponent = 6, symbol } = asset;
   const amountNumber = parseInt(amount, 10);
   const normalizedAmount = amountNumber / 10 ** exponent;
 
-  const setSendAsset = useSetAtom(SendAssetAtom);
-
   const handleRowClick = () => {
-    setSendAsset({
-      denom,
-      amount,
-      isIbc,
-      logo,
-      symbol,
-      exponent,
-    });
+    onRowClick(asset);
   };
 
   return (
@@ -57,7 +53,11 @@ const AssetRow = (asset: Asset) => {
   );
 };
 
-export const WalletInfoContainer = () => {
+export const WalletInfoContainer = ({
+  updateSendAsset,
+}: {
+  updateSendAsset: (asset: Asset, propagateChanges?: boolean) => void;
+}) => {
   const { username, address } = useChain(defaultChainName);
   const { data } = useWalletAssets();
   const { toast } = useToast();
@@ -132,9 +132,13 @@ export const WalletInfoContainer = () => {
         >
           <Table className="border table-fixed w-full">
             <TableBody>
-              {assets.map(asset => {
-                return <AssetRow key={asset.denom} {...asset} />;
-              })}
+              {assets.map(asset => (
+                <AssetRow
+                  key={asset.denom}
+                  asset={asset}
+                  onRowClick={asset => updateSendAsset(asset, true)} // Update and propagate changes
+                />
+              ))}
             </TableBody>
           </Table>
         </div>

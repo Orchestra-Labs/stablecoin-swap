@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '../Card';
 import { Input } from '../Input';
 import { CircleDollarSign } from 'lucide-react';
+import { greaterExponentDefault } from '@/constants';
 
 export type SwapCardProps = {
   title: string;
@@ -67,7 +68,7 @@ export const SwapCard = (props: SwapCardProps) => {
     }
   }, [selectedAsset, localSelectedValue]);
 
-  // Effect to update local input value whenever the parent updates amountValue
+  //Effect to update local input value whenever the parent updates amountValue
   useEffect(() => {
     if (!isNaN(amountValue) && amountValue !== null) {
       setLocalInputValue(formatNumberWithCommas(amountValue || 0));
@@ -107,7 +108,9 @@ export const SwapCard = (props: SwapCardProps) => {
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
     const caretPosition = event.target.selectionStart || 0;
-    const regex = getRegexForDecimals(selectedAsset?.exponent ?? 6);
+    const regex = getRegexForDecimals(
+      selectedAsset?.exponent ?? greaterExponentDefault,
+    );
 
     // Remove commas and non-numeric characters for accurate processing
     const rawValue = stripNonNumerics(inputValue);
@@ -142,7 +145,6 @@ export const SwapCard = (props: SwapCardProps) => {
       if (inputRef.current) {
         // Compare the previous value with the new one to determine if it's an addition or removal
         let characterWasAdded = false;
-
         if (rawValue.length > previousRawValue.length) {
           characterWasAdded = true;
         } else if (rawValue.length < previousRawValue.length) {
@@ -150,7 +152,6 @@ export const SwapCard = (props: SwapCardProps) => {
         } else {
           characterWasAdded = false;
         }
-
         let newCaretPosition = caretPosition;
         if (characterWasAdded) {
           if (formattedValue.length - rawValue.length > 1) {
@@ -167,9 +168,7 @@ export const SwapCard = (props: SwapCardProps) => {
           } else if (formattedValue.length === previousRawValue.length) {
           }
         }
-
         prevValueRef.current = processedValue;
-
         // Ensure caret assignment happens after the DOM is updated
         setTimeout(() => {
           inputRef.current?.setSelectionRange(
@@ -222,7 +221,7 @@ export const SwapCard = (props: SwapCardProps) => {
         <Input
           ref={inputRef}
           lang="en"
-          step={selectedAsset?.exponent ?? 6}
+          step={selectedAsset?.exponent ?? greaterExponentDefault}
           className="bg-black backdrop-blur-xl"
           type="text"
           placeholder="0.0"
