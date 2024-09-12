@@ -80,7 +80,6 @@ export const ReceiveSwapCard = () => {
       const exponent = sendAsset?.exponent || 6;
       const maxAvailable = amount / 10 ** exponent;
 
-      console.log('updated from receive');
       if (receiveAmount === 0) {
         setSendAmount(0);
       } else if (exchangeRate) {

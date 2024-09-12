@@ -106,13 +106,11 @@ export const SwapCard = (props: SwapCardProps) => {
   // Handle user input change, strip non-numerics, add the new character, and reformat
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
-    console.log('input', inputValue);
     const caretPosition = event.target.selectionStart || 0;
     const regex = getRegexForDecimals(selectedAsset?.exponent ?? 6);
 
     // Remove commas and non-numeric characters for accurate processing
     const rawValue = stripNonNumerics(inputValue);
-    console.log('raw', rawValue);
 
     // Split the input into the integer and decimal parts
     const [integerPart, decimalPart] = rawValue.split('.');
@@ -124,7 +122,6 @@ export const SwapCard = (props: SwapCardProps) => {
     }
 
     const numericValue = parseFloat(processedValue);
-    console.log('numeric', numericValue);
     if (!isNaN(numericValue) || !regex.test(inputValue) || inputValue === '') {
       onAmountValueChange(numericValue);
     } else {
@@ -165,7 +162,6 @@ export const SwapCard = (props: SwapCardProps) => {
             newCaretPosition += 1;
           }
         } else if (!characterWasAdded) {
-          console.log('checking character removal scenarios');
           if (previousFormattedValue.length - formattedValue.length > 1) {
             newCaretPosition -= 1;
           } else if (formattedValue.length === previousRawValue.length) {
