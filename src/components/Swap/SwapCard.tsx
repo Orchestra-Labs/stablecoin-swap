@@ -16,7 +16,7 @@ export type SwapCardProps = {
   title: string;
   selectPlaceholder: string;
   options: { [key: string]: { label: string; logo?: string } };
-  amountValue: number; // Passed amount from parent
+  amountValue: number;
   selectedAsset: Asset | null;
   onAssetValueChange: (value: string) => void;
   onAmountValueChange: (value: number) => void;
@@ -44,15 +44,15 @@ const Option = (props: { value: string; label: string; logo?: string }) => {
 
 export const SwapCard = (props: SwapCardProps) => {
   const [localSelectedValue, setLocalSelectedValue] = useState<string>('');
-  const [localInputValue, setLocalInputValue] = useState<string>(''); // Local input for temporary user value
+  const [localInputValue, setLocalInputValue] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const prevValueRef = useRef<string>(''); // To store the previous input value
+  const prevValueRef = useRef<string>('');
 
   const {
     title,
     selectPlaceholder,
     options,
-    amountValue, // Passed value from the parent
+    amountValue,
     selectedAsset,
     onAssetValueChange,
     onAmountValueChange,
@@ -70,16 +70,16 @@ export const SwapCard = (props: SwapCardProps) => {
   // Effect to update local input value whenever the parent updates amountValue
   useEffect(() => {
     if (!isNaN(amountValue) && amountValue !== null) {
-      setLocalInputValue(formatNumberWithCommas(amountValue || 0)); // Default to 0 if no value is set
+      setLocalInputValue(formatNumberWithCommas(amountValue || 0));
     } else {
-      setLocalInputValue('0.0'); // Set to 0.0 initially
+      setLocalInputValue('0.0');
     }
   }, [amountValue]);
 
-  // Disable amount input until an asset is selected
+  // Disable input until asset is selected
   const amountInputEnabled = !!localSelectedValue;
 
-  // Function to format the number with commas
+  // Format the number with commas
   const formatNumberWithCommas = (value: string | number): string => {
     const stringValue = String(value);
     const [integerPart, decimalPart] = stringValue.split('.') || ['', ''];
@@ -95,12 +95,12 @@ export const SwapCard = (props: SwapCardProps) => {
 
   // Helper function to remove all non-numeric characters (except decimal points)
   const stripNonNumerics = (value: string) => {
-    return value.replace(/[^\d.]/g, ''); // Remove everything except digits and the decimal point
+    return value.replace(/[^\d.]/g, '');
   };
 
-  // Regex to validate number input and restrict to selectedAsset.exponent decimal places
+  // Validate numberic input and restrict to selectedAsset.exponent decimal places
   const getRegexForDecimals = (exponent: number) => {
-    return new RegExp(`^\\d*\\.?\\d{0,${exponent}}$`); // Allows digits and at most `exponent` decimals
+    return new RegExp(`^\\d*\\.?\\d{0,${exponent}}$`);
   };
 
   // Handle user input change, strip non-numerics, add the new character, and reformat
@@ -126,20 +126,21 @@ export const SwapCard = (props: SwapCardProps) => {
     const numericValue = parseFloat(processedValue);
     console.log('numeric', numericValue);
     if (!isNaN(numericValue) || !regex.test(inputValue) || inputValue === '') {
-      onAmountValueChange(numericValue); // Propagate the numeric value to the parent
+      onAmountValueChange(numericValue);
     } else {
       onAmountValueChange(0);
     }
 
+    // Update the input with the formatted value
     const formattedValue = formatNumberWithCommas(processedValue || 0);
-    setLocalInputValue(formattedValue); // Update the input with the formatted value
+    setLocalInputValue(formattedValue);
 
     const previousRawValue = stripNonNumerics(prevValueRef.current);
     const previousFormattedValue = formatNumberWithCommas(
       parseFloat(previousRawValue),
     );
 
-    // Reapply formatting and reposition the caret
+    // Reposition the caret
     setTimeout(() => {
       if (inputRef.current) {
         // Compare the previous value with the new one to determine if it's an addition or removal
@@ -189,7 +190,7 @@ export const SwapCard = (props: SwapCardProps) => {
     const value = parseFloat(stripNonNumerics(localInputValue));
 
     if (!isNaN(value)) {
-      setLocalInputValue(formatNumberWithCommas(value)); // Format the input with commas on blur
+      setLocalInputValue(formatNumberWithCommas(value));
     }
   };
 
@@ -223,7 +224,7 @@ export const SwapCard = (props: SwapCardProps) => {
           </SelectContent>
         </Select>
         <Input
-          ref={inputRef} // Reference to the input to control cursor position
+          ref={inputRef}
           lang="en"
           step={selectedAsset?.exponent ?? 6}
           className="bg-black backdrop-blur-xl"

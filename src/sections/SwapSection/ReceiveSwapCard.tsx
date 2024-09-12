@@ -16,12 +16,12 @@ import { SendAmountAtom, SendAssetAtom, WalletAssetsAtom } from './atoms';
 export const ReceiveSwapCard = () => {
   const [receiveAsset, setReceiveAsset] = useAtom(ReceiveAssetAtom);
   const [receiveAmount, setReceiveAmount] = useAtom(ReceiveAmountAtom);
-  const [isReceiveUpdate, setIsReceiveUpdate] = useState(false); // Track Receive updates
+  const [isReceiveUpdate, setIsReceiveUpdate] = useState(false);
 
   const [sendAmount, setSendAmount] = useAtom(SendAmountAtom);
   const sendAsset = useAtomValue(SendAssetAtom);
   const walletAssets = useAtomValue(WalletAssetsAtom);
-  const { exchangeRate } = useExchangeRate(); // Use exchange rate hook
+  const { exchangeRate } = useExchangeRate();
 
   const { assets } = useOracleAssets();
   const { address } = useChain(defaultChainName);
@@ -86,14 +86,13 @@ export const ReceiveSwapCard = () => {
       } else if (exchangeRate) {
         let newSendAmount = receiveAmount / exchangeRate;
 
-        // Round the newSendAmount to the nearest value within the limit of the asset's exponent
         newSendAmount = parseFloat(newSendAmount.toFixed(exponent));
 
         if (newSendAmount > maxAvailable) {
           setSendAmount(maxAvailable);
           setReceiveAmount(
             parseFloat((maxAvailable * exchangeRate).toFixed(exponent)),
-          ); // Ensure receiveAmount is also rounded
+          );
         } else {
           setSendAmount(newSendAmount);
         }

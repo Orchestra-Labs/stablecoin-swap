@@ -31,7 +31,7 @@ export const SwapSection = () => {
   const { swapTx } = useSwapTx(defaultChainName);
 
   useEffect(() => {
-    setWalletAssets(data?.assets ?? []); // Ensure it's always an array
+    setWalletAssets(data?.assets ?? []);
   }, [data]);
 
   const performSwap = async () => {
@@ -40,7 +40,7 @@ export const SwapSection = () => {
       return;
     }
 
-    setLoading(true); // Set loading true during swap
+    setLoading(true);
     const sendAmountMicroUnit =
       sendAmount * 10 ** (selectedSendAsset.exponent || 6);
 
@@ -54,7 +54,7 @@ export const SwapSection = () => {
       selectedReceiveAsset.denom,
     );
     refetch();
-    setLoading(false); // Set loading false when done
+    setLoading(false);
   };
 
   return (
