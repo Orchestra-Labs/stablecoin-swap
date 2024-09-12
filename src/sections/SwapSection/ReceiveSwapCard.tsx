@@ -76,23 +76,29 @@ export const ReceiveSwapCard = () => {
   // Recalculate send amount when receive amount is updated, but not when the receive asset changes
   useEffect(() => {
     if (isReceiveUpdate && sendAsset) {
-      const amount = parseFloat(sendAsset?.amount || '0'); // Ensure `sendAsset.amount` is a number
+      const amount = parseFloat(sendAsset?.amount || '0');
       const exponent = sendAsset?.exponent || 6;
       const maxAvailable = amount / 10 ** exponent;
 
+      console.log('updated from receive');
       if (receiveAmount === 0) {
-        setSendAmount(0); // Set send amount to 0 if receive is 0
+        setSendAmount(0);
       } else if (exchangeRate) {
-        const newSendAmount = receiveAmount / exchangeRate;
+        let newSendAmount = receiveAmount / exchangeRate;
+
+        // Round the newSendAmount to the nearest value within the limit of the asset's exponent
+        newSendAmount = parseFloat(newSendAmount.toFixed(exponent));
 
         if (newSendAmount > maxAvailable) {
-          setSendAmount(maxAvailable); // Cap send amount to max available
-          setReceiveAmount(maxAvailable * exchangeRate); // Recompute receive amount
+          setSendAmount(maxAvailable);
+          setReceiveAmount(
+            parseFloat((maxAvailable * exchangeRate).toFixed(exponent)),
+          ); // Ensure receiveAmount is also rounded
         } else {
-          setSendAmount(newSendAmount); // Update send amount
+          setSendAmount(newSendAmount);
         }
       }
-      setIsReceiveUpdate(false); // Reset flag after update
+      setIsReceiveUpdate(false);
     }
   }, [receiveAmount, exchangeRate, sendAsset, walletAssets]);
 
