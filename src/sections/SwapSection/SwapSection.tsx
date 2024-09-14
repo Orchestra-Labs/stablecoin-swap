@@ -5,25 +5,29 @@ import { WalletInfoContainer } from '@/components/WalletInfo';
 import { defaultChainName, greaterExponentDefault } from '@/constants';
 import { useSwapTx } from '@/hooks/useSwapTx';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
-import {
-  ErrorMessageAtom,
-  LoadingAtom,
-  SendStateAtom,
-  ReceiveStateAtom,
-  WalletAssetsAtom,
-  ChangeMapAtom,
-} from '@/sections/SwapSection/atoms';
 import { ReceiveSwapCard } from '@/sections/SwapSection/ReceiveSwapCard';
 import { SendSwapCard } from '@/sections/SwapSection/SendSwapCard';
 import { Loader } from '@/components';
 import { useEffect } from 'react';
 import { Asset } from './types';
 import { useExchangeRate } from '@/hooks';
+import {
+  CallbackChangeMapAtom,
+  ChangeMapAtom,
+  ErrorMessageAtom,
+  LoadingAtom,
+  ReceiveStateAtom,
+  SendStateAtom,
+  WalletAssetsAtom,
+} from './atoms';
 
 export const SwapSection = () => {
   const [sendState, setSendState] = useAtom(SendStateAtom);
   const [receiveState, setReceiveState] = useAtom(ReceiveStateAtom);
   const [changeMap, setChangeMap] = useAtom(ChangeMapAtom);
+  const [callbackChangeMap, setCallbackChangeMap] = useAtom(
+    CallbackChangeMapAtom,
+  );
   const { exchangeRate } = useExchangeRate();
 
   const errorMessage = useAtomValue(ErrorMessageAtom);
@@ -83,6 +87,12 @@ export const SwapSection = () => {
 
     if (propagateChanges) {
       setChangeMap(prevMap => ({ ...prevMap, sendAsset: true }));
+      setCallbackChangeMap({
+        sendAsset: true,
+        receiveAsset: false,
+        sendAmount: false,
+        receiveAmount: false,
+      });
     }
   };
 
@@ -99,6 +109,12 @@ export const SwapSection = () => {
         ...prevMap,
         receiveAsset: true,
       }));
+      setCallbackChangeMap({
+        sendAsset: false,
+        receiveAsset: true,
+        sendAmount: false,
+        receiveAmount: false,
+      });
     }
   };
 
@@ -122,6 +138,12 @@ export const SwapSection = () => {
         ...prevMap,
         sendAmount: true,
       }));
+      setCallbackChangeMap({
+        sendAsset: false,
+        receiveAsset: false,
+        sendAmount: true,
+        receiveAmount: false,
+      });
     }
   };
 
@@ -145,47 +167,58 @@ export const SwapSection = () => {
         ...prevMap,
         receiveAmount: true,
       }));
+      setCallbackChangeMap({
+        sendAsset: false,
+        receiveAsset: false,
+        sendAmount: false,
+        receiveAmount: true,
+      });
     }
   };
 
-  const propagateChanges = () => {
-    if (changeMap.sendAsset) {
+  const propagateChanges = (
+    map = changeMap,
+    setMap = setChangeMap,
+    isExchangeRateUpdate = false,
+  ) => {
+    if (map.sendAsset) {
       const sendAsset = sendState.asset;
       const sendAmount = sendState.amount;
-      // Required since sendAsset is nullable
       if (sendAsset == null) {
         return;
       }
 
       const maxAvailable = calculateMaxAvailable(sendAsset);
       if (sendAmount > maxAvailable) {
-        // Reset sendAmount to maxAvailable
         const newSendAmount = maxAvailable;
         const newReceiveAmount = newSendAmount * (exchangeRate || 1);
 
         updateSendAmount(newSendAmount);
         updateReceiveAmount(newReceiveAmount);
       } else {
-        // If sendAmount is valid, update receiveAmount
         const newReceiveAmount = sendState.amount * (exchangeRate || 1);
         updateReceiveAmount(newReceiveAmount);
       }
 
       // Reset the flag
-      setChangeMap(prevMap => ({ ...prevMap, sendAsset: false }));
+      if (!isExchangeRateUpdate) {
+        setMap(prevMap => ({ ...prevMap, sendAsset: false }));
+      }
     }
 
-    if (changeMap.receiveAsset) {
+    if (map.receiveAsset) {
       const sendAmount = sendState.amount;
       const newReceiveAmount = sendAmount * (exchangeRate || 1);
 
       updateReceiveAmount(newReceiveAmount);
 
       // Reset the flag
-      setChangeMap(prevMap => ({ ...prevMap, receiveAsset: false }));
+      if (!isExchangeRateUpdate) {
+        setMap(prevMap => ({ ...prevMap, receiveAsset: false }));
+      }
     }
 
-    if (changeMap.sendAmount) {
+    if (map.sendAmount) {
       const sendAsset = sendState.asset;
       if (!sendAsset) return;
 
@@ -194,30 +227,27 @@ export const SwapSection = () => {
       let verifiedSendAmount =
         sendAmount > maxAvailable ? maxAvailable : sendAmount;
 
-      // Update sendAmount if it exceeds maxAvailable
       if (sendAmount > maxAvailable) {
         updateSendAmount(maxAvailable);
         verifiedSendAmount = maxAvailable;
       }
 
-      // Check if the send asset is the same as the receive asset
       let applicableExchangeRate =
         sendAsset.denom === receiveState.asset?.denom ? 1 : exchangeRate || 1;
-
       const newReceiveAmount = verifiedSendAmount * applicableExchangeRate;
       updateReceiveAmount(newReceiveAmount);
 
       // Reset the flag
-      setChangeMap(prevMap => ({ ...prevMap, sendAmount: false }));
+      if (!isExchangeRateUpdate) {
+        setMap(prevMap => ({ ...prevMap, sendAmount: false }));
+      }
     }
 
-    if (changeMap.receiveAmount) {
+    if (map.receiveAmount) {
       const sendAsset = sendState.asset;
       if (!sendAsset) return;
 
       const receiveAmount = receiveState.amount;
-      // If send and receive assets are the same, set sendAmount to receiveAmount
-      // Otherwise, calculate the sendAmount using 1/exchangeRate
       let applicableExchangeRate =
         sendAsset.denom === receiveState.asset?.denom
           ? 1
@@ -236,13 +266,20 @@ export const SwapSection = () => {
       }
 
       // Reset the flag
-      setChangeMap(prevMap => ({ ...prevMap, receiveAmount: false }));
+      if (!isExchangeRateUpdate) {
+        setMap(prevMap => ({ ...prevMap, receiveAmount: false }));
+      }
     }
   };
 
   useEffect(() => {
     propagateChanges();
   }, [changeMap]);
+
+  // Update on late exchangeRate returns
+  useEffect(() => {
+    propagateChanges(callbackChangeMap, setCallbackChangeMap, true);
+  }, [exchangeRate]);
 
   return (
     <div className="min-h-screen relative">

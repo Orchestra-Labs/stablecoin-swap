@@ -14,3 +14,10 @@ export const ChangeMapAtom = atom<Record<ChangeType, boolean>>({
   sendAmount: false,
   receiveAmount: false,
 });
+
+export const CallbackChangeMapAtom = atom<Record<ChangeType, boolean>>({
+  sendAsset: false,
+  receiveAsset: false,
+  sendAmount: false,
+  receiveAmount: false,
+});
