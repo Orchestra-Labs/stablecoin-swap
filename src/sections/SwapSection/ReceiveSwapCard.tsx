@@ -1,5 +1,5 @@
 import { useChain } from '@cosmos-kit/react';
-import { useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
 import { SwapCard } from '@/components/Swap';
 import {
@@ -10,7 +10,7 @@ import {
 } from '@/constants';
 import { useOracleAssets } from '@/hooks';
 import { Asset, truncateString } from '@/sections';
-import { ReceiveStateAtom } from './atoms';
+import { ReceiveAddressAtom, ReceiveStateAtom } from './atoms';
 
 export const ReceiveSwapCard = ({
   updateReceiveAsset,
@@ -24,11 +24,16 @@ export const ReceiveSwapCard = ({
 }) => {
   const receiveState = useAtomValue(ReceiveStateAtom);
   const { assets } = useOracleAssets();
-  const { address } = useChain(defaultChainName);
+  const initialAddress = useChain(defaultChainName);
+  const [address, setAddress] = useAtom(ReceiveAddressAtom);
 
   const [crossReferencedAssets, setCrossReferencedAssets] = useState<Asset[]>(
     [],
   );
+
+  useEffect(() => {
+    setAddress(initialAddress.address || '');
+  }, []);
 
   // Recalculate crossReferencedAssets when assets change
   useEffect(() => {
@@ -57,6 +62,10 @@ export const ReceiveSwapCard = ({
     }
   };
 
+  const onAddressChange = (newAddress: string) => {
+    setAddress(newAddress);
+  };
+
   return (
     <SwapCard
       title="Receive"
@@ -82,6 +91,7 @@ export const ReceiveSwapCard = ({
       onAmountValueChange={onAmountValueChange}
       amountInputEnabled={true}
       address={address ?? ''}
+      onAddressChange={onAddressChange}
       selectedAsset={receiveState.asset || null}
     />
   );

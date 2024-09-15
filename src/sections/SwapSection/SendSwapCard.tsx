@@ -56,6 +56,7 @@ export const SendSwapCard = ({
       onAssetValueChange={onAssetValueChange}
       onAmountValueChange={onAmountValueChange}
       address={address ?? ''}
+      onAddressChange={() => {}}
       addressInputEnabled={false}
     />
   );

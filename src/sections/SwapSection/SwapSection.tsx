@@ -2,7 +2,11 @@ import { useChain } from '@cosmos-kit/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import waves2 from '@/assets/images/waves-test.svg';
 import { WalletInfoContainer } from '@/components/WalletInfo';
-import { defaultChainName, greaterExponentDefault } from '@/constants';
+import {
+  defaultChainName,
+  greaterExponentDefault,
+  walletPrefix,
+} from '@/constants';
 import { useSwapTx } from '@/hooks/useSwapTx';
 import { useWalletAssets } from '@/hooks/useWalletAssets';
 import { ReceiveSwapCard } from '@/sections/SwapSection/ReceiveSwapCard';
@@ -16,6 +20,7 @@ import {
   ChangeMapAtom,
   ErrorMessageAtom,
   LoadingAtom,
+  ReceiveAddressAtom,
   ReceiveStateAtom,
   SendStateAtom,
   WalletAssetsAtom,
@@ -38,13 +43,25 @@ export const SwapSection = () => {
   const { address: sendAddress } = useChain(defaultChainName);
   const { swapTx } = useSwapTx(defaultChainName);
 
+  const receiveAddress = useAtomValue(ReceiveAddressAtom);
+
   useEffect(() => {
     setWalletAssets(data?.assets ?? []);
   }, [data]);
 
+  const validateAddress = (address: string) => {
+    const addressLength = 47;
+    return address.startsWith(walletPrefix) && address.length === addressLength;
+  };
+
   const performSwap = async () => {
     if (!receiveState.asset || !sendState.amount || !sendState.asset) {
       alert('Please enter NOTE amount and select both send and receive assets');
+      return;
+    }
+
+    if (!validateAddress(receiveAddress)) {
+      alert('Invalid receive address format');
       return;
     }
 
@@ -55,7 +72,7 @@ export const SwapSection = () => {
 
     await swapTx(
       sendAddress!,
-      sendAddress!,
+      receiveAddress,
       {
         denom: sendState.asset.denom,
         amount: sendAmountMicroUnit.toString(),

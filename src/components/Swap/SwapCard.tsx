@@ -22,6 +22,7 @@ export type SwapCardProps = {
   onAssetValueChange: (value: string) => void;
   onAmountValueChange: (value: number) => void;
   address: string;
+  onAddressChange: (value: string) => void;
   amountInputEnabled?: boolean;
   addressInputEnabled?: boolean;
 };
@@ -58,6 +59,7 @@ export const SwapCard = (props: SwapCardProps) => {
     onAssetValueChange,
     onAmountValueChange,
     address,
+    onAddressChange,
     addressInputEnabled = true,
   } = props;
 
@@ -189,6 +191,12 @@ export const SwapCard = (props: SwapCardProps) => {
     }
   };
 
+  const handleAddressChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const newAddress = event.target.value;
+
+    onAddressChange(newAddress);
+  };
+
   return (
     <Card className="w-[380px] bg-black backdrop-blur-xl">
       <CardHeader>
@@ -234,7 +242,7 @@ export const SwapCard = (props: SwapCardProps) => {
           className="bg-black backdrop-blur-xl"
           value={address}
           disabled={!addressInputEnabled}
-          onChange={() => {}}
+          onChange={handleAddressChange}
         />
       </CardContent>
     </Card>
