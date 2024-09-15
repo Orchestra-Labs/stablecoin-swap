@@ -69,12 +69,14 @@ export const useSwapTx = (chainName: string) => {
         description: 'Waiting for transaction to be included in the block',
       });
 
+      const gasAmount =
+        offerCoin.denom === 'note' || askDenom === 'note' ? '100000' : '350000';
       const signAndBroadcastPromise = client.signAndBroadcast(
         signerAddress!,
         [swapMsg],
         {
           amount: [{ denom: 'note', amount: '1000000' }],
-          gas: '100000',
+          gas: gasAmount,
         },
       );
       const response = await wrapPromiseWithTimeout<DeliverTxResponse>(
