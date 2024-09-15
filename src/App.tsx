@@ -28,6 +28,11 @@ const signerOptions: SignerOptions = {
   signingStargate: (_: unknown) => {
     return getSigningCosmosClientOptions();
   },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  preferredSignType: (_: unknown) => {
+    // `preferredSignType` determines which signer is preferred for `getOfflineSigner` method. By default `amino`. It might affect the `OfflineSigner` used in `signingStargateClient` and `signingCosmwasmClient`. But if only one signer is provided, `getOfflineSigner` will always return this signer, `preferredSignType` won't affect anything.
+    return 'direct';
+  },
 };
 
 export default function App() {
