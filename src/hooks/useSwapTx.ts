@@ -13,7 +13,7 @@ export const useSwapTx = (chainName: string) => {
     address: signerAddress,
     isWalletConnected,
     getRpcEndpoint,
-    getOfflineSignerDirect,
+    getOfflineSigner
   } = useChain(chainName);
   const { toast } = useToast();
 
@@ -54,7 +54,7 @@ export const useSwapTx = (chainName: string) => {
     try {
       const client = await getSigningOsmosisClient({
         rpcEndpoint: await getRpcEndpoint(),
-        signer: getOfflineSignerDirect(),
+        signer: getOfflineSigner(),
       });
 
       const swapMsg = swapSend({
