@@ -25,12 +25,12 @@ export const MAIN_LAYOUT_LINKS = [
     label: 'Blogs',
     target: '_blank',
     rel: 'noopener noreferrer',
-    href: 'https://medium.com/@orchestra-labs',
+    href: 'https://medium.com/@orchestra_labs',
   },
 ];
 
 export const SOCIAL_LINKS = [
-  { id: '1', href: 'https://twitter.com/orchestra-labs', Icon: XIcon },
+  { id: '1', href: 'https://twitter.com/orchestra_labs', Icon: XIcon },
   { id: '2', href: 'https://t.me/+xFieHCYYyx41NGQx', Icon: Telegram },
   { id: '3', href: 'https://github.com/Orchestra-Labs', Icon: GitHub },
   { id: '4', href: 'https://discord.gg/symphonyblockchain', Icon: Discord },
