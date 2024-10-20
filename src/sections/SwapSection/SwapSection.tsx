@@ -55,6 +55,7 @@ export const SwapSection = () => {
   };
 
   const performSwap = async () => {
+    // TODO: change alerts for error displays
     if (!receiveState.asset || !sendState.amount || !sendState.asset) {
       alert('Please enter NOTE amount and select both send and receive assets');
       return;
