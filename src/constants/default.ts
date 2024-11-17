@@ -26,8 +26,8 @@ export const localAssetRegistry: AssetRegistry = {
     symbol: 'HUSD',
     exponent: 6,
   },
-  ukhd: {
-    denom: 'ukhd',
+  uhkd: {
+    denom: 'uhkd',
     amount: '1.282',
     isIbc: false,
     logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphonytestnet/images/hhkd.png',
