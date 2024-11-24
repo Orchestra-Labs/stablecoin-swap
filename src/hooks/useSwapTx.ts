@@ -1,12 +1,12 @@
 import { Coin } from '@cosmjs/amino';
 import { DeliverTxResponse, isDeliverTxSuccess } from '@cosmjs/stargate';
 import { useChain } from '@cosmos-kit/react';
-import { getSigningOsmosisClient, osmosis } from '@orchestra-labs/symphonyjs';
+import { getSigningSymphonyClient, symphony } from '@orchestra-labs/symphonyjs';
 import { truncateString } from '@/sections';
 import { wrapPromiseWithTimeout } from '@/helpers/timeout';
 import { useToast } from '@/hooks/useToast';
 
-const { swapSend } = osmosis.market.v1beta1.MessageComposer.withTypeUrl;
+const { swapSend } = symphony.market.v1beta1.MessageComposer.withTypeUrl;
 
 export const useSwapTx = (chainName: string) => {
   const {
@@ -52,7 +52,7 @@ export const useSwapTx = (chainName: string) => {
       return;
     }
     try {
-      const client = await getSigningOsmosisClient({
+      const client = await getSigningSymphonyClient({
         rpcEndpoint: await getRpcEndpoint(),
         signer: getOfflineSignerDirect(),
       });

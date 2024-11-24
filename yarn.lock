@@ -2451,9 +2451,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@orchestra-labs/symphonyjs@npm:^1.0.28":
-  version: 1.0.28
-  resolution: "@orchestra-labs/symphonyjs@npm:1.0.28"
+"@orchestra-labs/symphonyjs@npm:^1.0.29":
+  version: 1.0.29
+  resolution: "@orchestra-labs/symphonyjs@npm:1.0.29"
   dependencies:
     "@cosmjs/amino": "npm:^0.32.3"
     "@cosmjs/crypto": "npm:^0.32.3"
@@ -2462,7 +2462,7 @@ __metadata:
     "@cosmjs/stargate": "npm:^0.32.3"
     "@cosmjs/tendermint-rpc": "npm:^0.32.4"
     "@cosmology/lcd": "npm:^0.13.4"
-  checksum: 10c0/6db3f44c2febd4ea2f93bf02e348b2e6055a59b82e36bfbd18b984105902191089df81aadc873d7805c18df90f637e370320d5c181687d93062179ee71054a02
+  checksum: 10c0/f7812a525dba7a2e21492276f745b5338b19983adffcf059b208adaf1ac553530d311fbbab75f714894941d86803f312fdf8f2ba62086192697c9926be62f6d5
   languageName: node
   linkType: hard
 
@@ -11900,9 +11900,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"symphony-markup@workspace:.":
+"symphony-swap@workspace:.":
   version: 0.0.0-use.local
-  resolution: "symphony-markup@workspace:."
+  resolution: "symphony-swap@workspace:."
   dependencies:
     "@chain-registry/types": "npm:^0.45.65"
     "@cosmjs/amino": "npm:^0.32.4"
@@ -11916,7 +11916,7 @@ __metadata:
     "@interchain-ui/react-no-ssr": "npm:^0.1.9"
     "@keplr-wallet/types": "npm:^0.12.123"
     "@mantine/hooks": "npm:7.6.1"
-    "@orchestra-labs/symphonyjs": "npm:^1.0.28"
+    "@orchestra-labs/symphonyjs": "npm:^1.0.29"
     "@radix-ui/react-accordion": "npm:~1.1.2"
     "@radix-ui/react-progress": "npm:~1.0.3"
     "@radix-ui/react-select": "npm:^2.1.1"
