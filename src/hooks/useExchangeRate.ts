@@ -32,7 +32,7 @@ export function useExchangeRate() {
       const restEndpoint = await getRestEndpoint();
 
       const response = await fetch(
-        `${restEndpoint}/osmosis/market/v1beta1/swap?offerCoin=1000000${sendAsset}&askDenom=${receiveAsset}`,
+        `${restEndpoint}/symphony/market/v1beta1/swap?offerCoin=1000000${sendAsset}&askDenom=${receiveAsset}`,
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');

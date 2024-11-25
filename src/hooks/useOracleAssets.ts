@@ -13,7 +13,7 @@ export function useOracleAssets() {
     queryFn: async () => {
       const restEndpoint = await getRestEndpoint();
       const response = await fetch(
-        `${restEndpoint}/osmosis/oracle/v1beta1/denoms/exchange_rates`,
+        `${restEndpoint}/symphony/oracle/v1beta1/denoms/exchange_rates`,
       );
       const data = await response.json();
       const assetsWithNative = [
