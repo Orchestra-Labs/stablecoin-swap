@@ -25,10 +25,17 @@ import {
   SendStateAtom,
   WalletAssetsAtom,
 } from './atoms';
+import { useFeeInfo } from '@/hooks/useTobinTaxes';
 
 export const SwapSection = () => {
   const [sendState, setSendState] = useAtom(SendStateAtom);
   const [receiveState, setReceiveState] = useAtom(ReceiveStateAtom);
+  const {
+    tobinTaxes,
+    taxRate,
+    isLoading: feeLoading,
+    error: feeError,
+  } = useFeeInfo(); // Fetch fee info
   const [changeMap, setChangeMap] = useAtom(ChangeMapAtom);
   const [callbackChangeMap, setCallbackChangeMap] = useAtom(
     CallbackChangeMapAtom,
@@ -48,6 +55,20 @@ export const SwapSection = () => {
   useEffect(() => {
     setWalletAssets(data?.assets ?? []);
   }, [data]);
+
+  // TODO: use these to update fees for more accurate receive values
+  useEffect(() => {
+    if (tobinTaxes) {
+      console.log('Tobin Taxes:', tobinTaxes);
+    }
+
+    if (taxRate) {
+      console.log('Tax Rate:', taxRate);
+    }
+
+    console.log('fee loading', feeLoading);
+    console.log('fee error', feeError);
+  }, [tobinTaxes, taxRate]);
 
   const validateAddress = (address: string) => {
     const addressLength = 47;
