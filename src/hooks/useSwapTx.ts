@@ -70,7 +70,7 @@ export const useSwapTx = (chainName: string) => {
       });
 
       const gasAmount =
-        offerCoin.denom === 'note' || askDenom === 'note' ? '100000' : '350000';
+        offerCoin.denom === 'note' || askDenom === 'note' ? '150000' : '350000';
       const signAndBroadcastPromise = client.signAndBroadcast(
         signerAddress!,
         [swapMsg],
