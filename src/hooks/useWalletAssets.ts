@@ -53,7 +53,8 @@ export function useWalletAssets() {
           if (!registryAsset) {
             symbol =
               localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
-                ?.symbol ?? coin.denom;
+                ?.symbol ??
+              `H${coin.denom.startsWith('u') ? coin.denom.slice(1) : coin.denom}`.toUpperCase();
             exponent =
               localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
                 ?.exponent ?? 0;
