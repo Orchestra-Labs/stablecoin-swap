@@ -69,7 +69,9 @@ export function useWalletAssets() {
               registryAsset.logo_URIs?.png ?? registryAsset.logo_URIs?.jpeg;
           }
           return {
-            symbol: symbol ?? coin.denom,
+            symbol:
+              symbol ||
+              `H${coin.denom.startsWith('u') ? coin.denom.slice(1) : coin.denom}`.toUpperCase(),
             exponent: exponent ?? 0,
             denom: coin.denom,
             amount: coin.amount,

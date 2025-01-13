@@ -40,7 +40,9 @@ export const ReceiveSwapCard = ({
     const mergedAssets = [...assets, ...Object.values(localAssetRegistry)];
     const updatedAssets = mergedAssets.map(asset => ({
       ...asset,
-      symbol: asset.symbol || asset.denom,
+      symbol:
+        asset.symbol ||
+        `H${asset.denom.startsWith('u') ? asset.denom.slice(1) : asset.denom}`.toUpperCase(),
     }));
     setCrossReferencedAssets(updatedAssets);
   }, [assets]);
