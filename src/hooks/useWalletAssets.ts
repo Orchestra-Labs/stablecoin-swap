@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 
 import {
   defaultChainName,
+  greaterExponentDefault,
   IBCPrefix,
   localAssetRegistry,
   rpcUrl,
@@ -57,7 +58,7 @@ export function useWalletAssets() {
               `H${coin.denom.startsWith('u') ? coin.denom.slice(1) : coin.denom}`.toUpperCase();
             exponent =
               localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
-                ?.exponent ?? 0;
+                ?.exponent ?? greaterExponentDefault;
             logo =
               localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
                 ?.logo;
@@ -65,7 +66,7 @@ export function useWalletAssets() {
             symbol = registryAsset.symbol;
             exponent =
               localAssetRegistry[coin.denom as keyof typeof localAssetRegistry]
-                ?.exponent ?? 0;
+                ?.exponent ?? greaterExponentDefault;
             logo =
               registryAsset.logo_URIs?.png ?? registryAsset.logo_URIs?.jpeg;
           }
@@ -73,7 +74,7 @@ export function useWalletAssets() {
             symbol:
               symbol ||
               `H${coin.denom.startsWith('u') ? coin.denom.slice(1) : coin.denom}`.toUpperCase(),
-            exponent: exponent ?? 0,
+            exponent: exponent ?? greaterExponentDefault,
             denom: coin.denom,
             amount: coin.amount,
             isIbc: coin.denom.startsWith(IBCPrefix),
