@@ -34,14 +34,6 @@ export const localAssetRegistry: AssetRegistry = {
     symbol: 'HHKD',
     exponent: 6,
   },
-  uvnd: {
-    denom: 'uvnd',
-    amount: '0.000399',
-    isIbc: false,
-    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphonytestnet/images/hvnd.png',
-    symbol: 'HVND',
-    exponent: 6,
-  },
   note: {
     denom: 'note',
     amount: '1',
