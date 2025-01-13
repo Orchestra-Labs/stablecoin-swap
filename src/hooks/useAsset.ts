@@ -9,7 +9,7 @@ export const useAsset = (chainName: string) => {
   const { assets } = useChain(chainName);
 
   const find = (denom: string): Asset | undefined => {
-    const assetsList = assets?.assets ?? [];
+    const assetsList = (assets?.assets ?? []) as Asset[];
 
     return assetsList.find(asset => matchDenom(denom, asset.denom_units));
   };
