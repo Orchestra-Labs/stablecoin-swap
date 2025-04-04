@@ -1,9 +1,11 @@
 import { useChain } from '@cosmos-kit/react';
-import { CircleDollarSign } from 'lucide-react';
-import { useRef, useState, useEffect } from 'react';
+import { CircleDollarSign, LogOut } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
 import { defaultChainName, IBCPrefix, walletPrefix } from '@/constants';
 import { useToast, useWalletAssets } from '@/hooks';
 import { Asset, truncateString } from '@/sections';
+
 import {
   Card,
   CardContent,
@@ -58,18 +60,18 @@ export const WalletInfoContainer = ({
 }: {
   updateSendAsset: (asset: Asset, propagateChanges?: boolean) => void;
 }) => {
-  const { username, address } = useChain(defaultChainName);
+  const { username, address, disconnect } = useChain(defaultChainName);
   const { data } = useWalletAssets();
   const { toast } = useToast();
 
   const assets = data?.resolvedAddresses || [];
 
-  const copyToClipboard = (address: string) => {
-    navigator.clipboard.writeText(address);
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
 
     toast({
       title: `Copied to clipboard!`,
-      description: `Address ${truncateString(walletPrefix, address)} has been copied.`,
+      description: `Address ${truncateString(walletPrefix, text)} has been copied.`,
     });
   };
 
@@ -82,9 +84,9 @@ export const WalletInfoContainer = ({
       const container = tableContainerRef.current;
       if (!container) return;
 
-      const scrollTop = container.scrollTop;
-      const scrollHeight = container.scrollHeight;
-      const clientHeight = container.clientHeight;
+      const { scrollTop } = container;
+      const { scrollHeight } = container;
+      const { clientHeight } = container;
 
       const showTopShadow = scrollTop > 0;
       const showBottomShadow = scrollTop + clientHeight < scrollHeight;
@@ -115,7 +117,7 @@ export const WalletInfoContainer = ({
 
   return (
     <Card className="w-full max-w-[400px] bg-black backdrop-blur-xl">
-      <CardHeader>
+      <CardHeader className="relative">
         <CardTitle>Wallet: {username}</CardTitle>
         <CardDescription
           className="hover:bg-blue-hover hover:cursor-pointer p-2 rounded-md"
@@ -123,6 +125,14 @@ export const WalletInfoContainer = ({
         >
           {address}
         </CardDescription>
+        <button
+          className="absolute top-1 right-2.5 inline-block text-blue"
+          onClick={() => disconnect()}
+          aria-label="Disconnect wallet"
+          type="button"
+        >
+          <LogOut className="inline-block size-5" />
+        </button>
       </CardHeader>
       <CardContent>
         <div
