@@ -4,29 +4,20 @@ import { LinkTree } from '@/assets/icons/LinkTree';
 export const MAIN_LAYOUT_LINKS = [
   {
     id: '1',
-    label: 'Whitepaper',
-    target: '_blank',
-    href: 'https://orchestralabs.org/whitepaper',
+    label: 'Airdrop',
+    href: 'https://airdrop-tracker.orchestralabs.org/',
   },
   {
     id: '2',
-    label: 'Documentation',
-    target: '_blank',
-    href: 'https://orchestralabs.org/documentation',
+    label: 'Swap',
+    href: 'https://swap.orchestralabs.org/',
   },
   {
     id: '3',
-    label: 'Explorer',
-    target: '_blank',
-    href: 'https://testnet.ping.pub/symphony',
+    label: 'Whitepaper',
+    href: 'https://orchestralabs.org/whitepaper',
   },
-  {
-    id: '4',
-    label: 'Blogs',
-    target: '_blank',
-    rel: 'noopener noreferrer',
-    href: 'https://medium.com/@orchestra_labs',
-  },
+  { id: '4', label: 'Learn', href: 'https://orchestralabs.org/documentation' },
 ];
 
 export const SOCIAL_LINKS = [
