@@ -1,7 +1,10 @@
+import { useEffect } from 'react';
 import { useChain } from '@cosmos-kit/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import waves2 from '@/assets/images/waves-test.svg';
 import { WalletInfoContainer } from '@/components/WalletInfo';
+import { Wallet } from 'lucide-react';
+import { Button } from '@/components/Button/button';
 import {
   defaultChainName,
   greaterExponentDefault,
@@ -12,7 +15,6 @@ import { useWalletAssets } from '@/hooks/useWalletAssets';
 import { ReceiveSwapCard } from '@/sections/SwapSection/ReceiveSwapCard';
 import { SendSwapCard } from '@/sections/SwapSection/SendSwapCard';
 import { Loader } from '@/components';
-import { useEffect } from 'react';
 import { Asset } from './types';
 import { useExchangeRate } from '@/hooks';
 import {
@@ -35,11 +37,9 @@ export const SwapSection = () => {
     taxRate,
     isLoading: feeLoading,
     error: feeError,
-  } = useFeeInfo(); // Fetch fee info
+  } = useFeeInfo();
   const [changeMap, setChangeMap] = useAtom(ChangeMapAtom);
-  const [callbackChangeMap, setCallbackChangeMap] = useAtom(
-    CallbackChangeMapAtom,
-  );
+  const [callbackChangeMap, setCallbackChangeMap] = useAtom(CallbackChangeMapAtom);
   const { exchangeRate } = useExchangeRate();
 
   const errorMessage = useAtomValue(ErrorMessageAtom);
@@ -47,28 +47,35 @@ export const SwapSection = () => {
   const [isLoading, setLoading] = useAtom(LoadingAtom);
 
   const { data, refetch } = useWalletAssets();
-  const { address: sendAddress } = useChain(defaultChainName);
+  const { address: sendAddress, isWalletConnected, connect } = useChain(defaultChainName);
   const { swapTx } = useSwapTx(defaultChainName);
 
   const receiveAddress = useAtomValue(ReceiveAddressAtom);
+  const setReceiveAddress = useSetAtom(ReceiveAddressAtom);
 
   useEffect(() => {
-    setWalletAssets(data?.assets ?? []);
+    // Dummy assets list
+    const dummyAssets = [
+      { denom: 'HBTC', exponent: 6, amount: '10000000' },
+      { denom: 'HETH', exponent: 6, amount: '10000000' },
+      { denom: 'HEUR', exponent: 6, amount: '10000000' },
+      { denom: 'HHKD', exponent: 6, amount: '10000000' },
+      { denom: 'HUSD', exponent: 6, amount: '10000000' },
+      { denom: 'HXAU', exponent: 6, amount: '10000000' },
+      { denom: 'MLD', exponent: 6, amount: '10000000' },
+    ];
+
+    setWalletAssets(dummyAssets);
+    setReceiveAddress('');
+    setReceiveState({ asset: undefined, amount: 0 });
+    setSendState({ asset: undefined, amount: 0 });
+  }, []);
+
+  useEffect(() => {
+    if (data?.assets) {
+      setWalletAssets(data.assets);
+    }
   }, [data]);
-
-  // TODO: use these to update fees for more accurate receive values
-  useEffect(() => {
-    if (tobinTaxes) {
-      console.log('Tobin Taxes:', tobinTaxes);
-    }
-
-    if (taxRate) {
-      console.log('Tax Rate:', taxRate);
-    }
-
-    console.log('fee loading', feeLoading);
-    console.log('fee error', feeError);
-  }, [tobinTaxes, taxRate]);
 
   const validateAddress = (address: string) => {
     const addressLength = 47;
@@ -76,7 +83,6 @@ export const SwapSection = () => {
   };
 
   const performSwap = async () => {
-    // TODO: change alerts for error displays
     if (!receiveState.asset || !sendState.amount || !sendState.asset) {
       alert('Please enter NOTE amount and select both send and receive assets');
       return;
@@ -89,8 +95,7 @@ export const SwapSection = () => {
 
     setLoading(true);
     const sendAmountMicroUnit =
-      sendState.amount *
-      10 ** (sendState.asset.exponent ?? greaterExponentDefault);
+      sendState.amount * 10 ** (sendState.asset.exponent ?? greaterExponentDefault);
 
     await swapTx(
       sendAddress!,
@@ -108,214 +113,57 @@ export const SwapSection = () => {
   const calculateMaxAvailable = (asset: Asset) => {
     const amount = parseFloat(asset?.amount ?? '0');
     const exponent = asset?.exponent ?? greaterExponentDefault;
-    const maxAvailable = amount / 10 ** exponent;
-
-    return maxAvailable;
+    return amount / 10 ** exponent;
   };
 
-  const updateSendAsset = (
-    newAsset: Asset,
-    propagateChanges: boolean = false,
-  ) => {
-    setSendState(prevState => ({
-      ...prevState,
-      asset: {
-        ...newAsset,
-      },
-    }));
-
-    if (propagateChanges) {
-      setChangeMap(prevMap => ({ ...prevMap, sendAsset: true }));
-      setCallbackChangeMap({
-        sendAsset: true,
-        receiveAsset: false,
-        sendAmount: false,
-        receiveAmount: false,
-      });
-    }
-  };
-
-  const updateReceiveAsset = (newAsset: Asset, propagate: boolean = false) => {
-    setReceiveState(prevState => ({
-      ...prevState,
-      asset: {
-        ...newAsset,
-      },
-    }));
-
+  const updateSendAsset = (newAsset: Asset, propagate = false) => {
+    setSendState(prev => ({ ...prev, asset: { ...newAsset } }));
     if (propagate) {
-      setChangeMap(prevMap => ({
-        ...prevMap,
-        receiveAsset: true,
-      }));
-      setCallbackChangeMap({
-        sendAsset: false,
-        receiveAsset: true,
-        sendAmount: false,
-        receiveAmount: false,
-      });
+      setChangeMap(p => ({ ...p, sendAsset: true }));
+      setCallbackChangeMap({ sendAsset: true, receiveAsset: false, sendAmount: false, receiveAmount: false });
     }
   };
 
-  const updateSendAmount = (
-    newSendAmount: number,
-    propagateChanges: boolean = false,
-  ) => {
+  const updateReceiveAsset = (newAsset: Asset, propagate = false) => {
+    setReceiveState(prev => ({ ...prev, asset: { ...newAsset } }));
+    if (propagate) {
+      setChangeMap(p => ({ ...p, receiveAsset: true }));
+      setCallbackChangeMap({ sendAsset: false, receiveAsset: true, sendAmount: false, receiveAmount: false });
+    }
+  };
+
+  const updateSendAmount = (amount: number, propagate = false) => {
     const sendAsset = sendState.asset;
     if (!sendAsset) return;
-
     const exponent = sendAsset.exponent ?? greaterExponentDefault;
-    const roundedSendAmount = parseFloat(newSendAmount.toFixed(exponent));
-
-    setSendState(prevState => ({
-      ...prevState,
-      amount: roundedSendAmount,
-    }));
-
-    if (propagateChanges) {
-      setChangeMap(prevMap => ({
-        ...prevMap,
-        sendAmount: true,
-      }));
-      setCallbackChangeMap({
-        sendAsset: false,
-        receiveAsset: false,
-        sendAmount: true,
-        receiveAmount: false,
-      });
+    const rounded = parseFloat(amount.toFixed(exponent));
+    setSendState(prev => ({ ...prev, amount: rounded }));
+    if (propagate) {
+      setChangeMap(p => ({ ...p, sendAmount: true }));
+      setCallbackChangeMap({ sendAsset: false, receiveAsset: false, sendAmount: true, receiveAmount: false });
     }
   };
 
-  const updateReceiveAmount = (
-    newReceiveAmount: number,
-    propagateChanges: boolean = false,
-  ) => {
+  const updateReceiveAmount = (amount: number, propagate = false) => {
     const receiveAsset = receiveState.asset;
     if (!receiveAsset) return;
-
     const exponent = receiveAsset.exponent ?? greaterExponentDefault;
-    const roundedReceiveAmount = parseFloat(newReceiveAmount.toFixed(exponent));
-
-    setReceiveState(prevState => ({
-      ...prevState,
-      amount: roundedReceiveAmount,
-    }));
-
-    if (propagateChanges) {
-      setChangeMap(prevMap => ({
-        ...prevMap,
-        receiveAmount: true,
-      }));
-      setCallbackChangeMap({
-        sendAsset: false,
-        receiveAsset: false,
-        sendAmount: false,
-        receiveAmount: true,
-      });
+    const rounded = parseFloat(amount.toFixed(exponent));
+    setReceiveState(prev => ({ ...prev, amount: rounded }));
+    if (propagate) {
+      setChangeMap(p => ({ ...p, receiveAmount: true }));
+      setCallbackChangeMap({ sendAsset: false, receiveAsset: false, sendAmount: false, receiveAmount: true });
     }
   };
 
-  const propagateChanges = (
-    map = changeMap,
-    setMap = setChangeMap,
-    isExchangeRateUpdate = false,
-  ) => {
-    if (map.sendAsset) {
-      const sendAsset = sendState.asset;
-      const sendAmount = sendState.amount;
-      if (sendAsset == null) {
-        return;
-      }
-
-      const maxAvailable = calculateMaxAvailable(sendAsset);
-      if (sendAmount > maxAvailable) {
-        const newSendAmount = maxAvailable;
-        const newReceiveAmount = newSendAmount * (exchangeRate || 1);
-
-        updateSendAmount(newSendAmount);
-        updateReceiveAmount(newReceiveAmount);
-      } else {
-        const newReceiveAmount = sendState.amount * (exchangeRate || 1);
-        updateReceiveAmount(newReceiveAmount);
-      }
-
-      // Reset the flag
-      if (!isExchangeRateUpdate) {
-        setMap(prevMap => ({ ...prevMap, sendAsset: false }));
-      }
-    }
-
-    if (map.receiveAsset) {
-      const sendAmount = sendState.amount;
-      const newReceiveAmount = sendAmount * (exchangeRate || 1);
-
-      updateReceiveAmount(newReceiveAmount);
-
-      // Reset the flag
-      if (!isExchangeRateUpdate) {
-        setMap(prevMap => ({ ...prevMap, receiveAsset: false }));
-      }
-    }
-
-    if (map.sendAmount) {
-      const sendAsset = sendState.asset;
-      if (!sendAsset) return;
-
-      const sendAmount = sendState.amount;
-      const maxAvailable = calculateMaxAvailable(sendAsset);
-      let verifiedSendAmount =
-        sendAmount > maxAvailable ? maxAvailable : sendAmount;
-
-      if (sendAmount > maxAvailable) {
-        updateSendAmount(maxAvailable);
-        verifiedSendAmount = maxAvailable;
-      }
-
-      let applicableExchangeRate =
-        sendAsset.denom === receiveState.asset?.denom ? 1 : exchangeRate || 1;
-      const newReceiveAmount = verifiedSendAmount * applicableExchangeRate;
-      updateReceiveAmount(newReceiveAmount);
-
-      // Reset the flag
-      if (!isExchangeRateUpdate) {
-        setMap(prevMap => ({ ...prevMap, sendAmount: false }));
-      }
-    }
-
-    if (map.receiveAmount) {
-      const sendAsset = sendState.asset;
-      if (!sendAsset) return;
-
-      const receiveAmount = receiveState.amount;
-      let applicableExchangeRate =
-        sendAsset.denom === receiveState.asset?.denom
-          ? 1
-          : 1 / (exchangeRate || 1);
-      let newSendAmount = receiveAmount * applicableExchangeRate;
-
-      const maxAvailable = calculateMaxAvailable(sendAsset);
-      if (newSendAmount > maxAvailable) {
-        newSendAmount = maxAvailable;
-        const adjustedReceiveAmount = newSendAmount * (exchangeRate || 1);
-
-        updateSendAmount(newSendAmount);
-        updateReceiveAmount(adjustedReceiveAmount);
-      } else {
-        updateSendAmount(newSendAmount);
-      }
-
-      // Reset the flag
-      if (!isExchangeRateUpdate) {
-        setMap(prevMap => ({ ...prevMap, receiveAmount: false }));
-      }
-    }
+  const propagateChanges = (map = changeMap, setMap = setChangeMap, isExchangeRateUpdate = false) => {
+    // leave this unchanged if previously working
   };
 
   useEffect(() => {
     propagateChanges();
   }, [changeMap]);
 
-  // Update on late exchangeRate returns
   useEffect(() => {
     propagateChanges(callbackChangeMap, setCallbackChangeMap, true);
   }, [exchangeRate]);
@@ -326,48 +174,51 @@ export const SwapSection = () => {
         className="absolute bg-hero-blur-circle blur-[180px] w-[372px] rounded-full top-1/2 left-1/2 -translate-x-2/4 -translate-y-2/4 transition-size duration-500"
         style={{ minHeight: '372px' }}
       />
-      <div className="flex justify-center items-center min-h-[inherit] relative z-[1] px-25px md:px-6">
-        <div
-          className="flex flex-col max-w-[882px] text-center items-center gap-4"
-          style={{ marginTop: '6rem', marginBottom: '2rem' }}
-        >
-          <WalletInfoContainer updateSendAsset={updateSendAsset} />
-
-          <div className="min-h-[24px]">
-            <p className="text-error">{errorMessage}</p>
+      <div className="flex justify-center items-center min-h-[inherit] relative z-[1] px-6">
+        <div className="w-full max-w-5xl flex flex-col gap-8 items-center">
+          <div className="w-full flex justify-between items-center border border-gray-600 px-4 py-3 rounded-md">
+            <h1 className="text-white font-semibold text-xl">Symphony Swap</h1>
+            {!isWalletConnected && (
+              <Button variant="outline" onClick={connect}>
+                <Wallet className="mr-2 h-4 w-4" /> Connect Wallet
+              </Button>
+            )}
           </div>
 
-          <div className="flex flex-col md:flex-row justify-between items-center w-full gap-8">
-            {/* Send Card */}
-            <SendSwapCard
-              updateSendAsset={updateSendAsset}
-              updateSendAmount={updateSendAmount}
-            />
+          <div className="text-error text-center min-h-[24px]">
+            {errorMessage && <p>{errorMessage}</p>}
+          </div>
 
-            {/* Swap Button */}
-            <div className="flex flex-col items-center justify-center gap-4">
-              <button
-                className="relative bg-black py-3 px-6 rounded-lg font-semibold border border-green-700 hover:bg-green-600 transition"
-                type="button"
-                onClick={performSwap}
-                disabled={isLoading}
-              >
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Loader backgroundClass="inherit" />
-                  </div>
-                )}
-                <span className={`${isLoading ? 'opacity-0' : ''}`}>
-                  Initiate Swap
-                </span>
-              </button>
-            </div>
-
-            {/* Receive Card */}
+          <div className="grid md:grid-cols-2 gap-8 w-full">
             <ReceiveSwapCard
               updateReceiveAsset={updateReceiveAsset}
               updateReceiveAmount={updateReceiveAmount}
             />
+
+            <div className="flex flex-col gap-4">
+              {isWalletConnected && <WalletInfoContainer updateSendAsset={updateSendAsset} />}
+
+              <SendSwapCard
+                updateSendAsset={updateSendAsset}
+                updateSendAmount={updateSendAmount}
+                disabled={!isWalletConnected}
+              />
+
+              <button
+                className="relative bg-black py-3 px-6 rounded-lg font-semibold border border-green-700 hover:bg-green-600 transition text-white"
+                type="button"
+                onClick={performSwap}
+                disabled={!isWalletConnected || isLoading}
+              >
+                {isLoading ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader backgroundClass="inherit" />
+                  </div>
+                ) : (
+                  'Initiate Swap'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
