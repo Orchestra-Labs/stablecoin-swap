@@ -54,7 +54,6 @@ export const SwapSection = () => {
   const setReceiveAddress = useSetAtom(ReceiveAddressAtom);
 
   useEffect(() => {
-    // Dummy assets list
     const dummyAssets = [
       { denom: 'HBTC', exponent: 6, amount: '10000000' },
       { denom: 'HETH', exponent: 6, amount: '10000000' },
@@ -174,9 +173,12 @@ export const SwapSection = () => {
         className="absolute bg-hero-blur-circle blur-[180px] w-[372px] rounded-full top-1/2 left-1/2 -translate-x-2/4 -translate-y-2/4 transition-size duration-500"
         style={{ minHeight: '372px' }}
       />
-      <div className="flex justify-center items-center min-h-[inherit] relative z-[1] px-6">
-        <div className="w-full max-w-5xl flex flex-col gap-8 items-center">
-          <div className="w-full flex justify-between items-center border border-gray-600 px-4 py-3 rounded-md">
+      <div className="flex justify-center items-center min-h-[inherit] relative z-[1] px-25px md:px-6">
+        <div
+          className="flex flex-col max-w-[882px] text-center items-center gap-4"
+          style={{ marginTop: '6rem', marginBottom: '2rem' }}
+        >
+          <div className="flex justify-between items-center w-full border border-gray-600 px-4 py-3 rounded-md">
             <h1 className="text-white font-semibold text-xl">Symphony Swap</h1>
             {!isWalletConnected && (
               <Button variant="outline" onClick={connect}>
@@ -185,40 +187,38 @@ export const SwapSection = () => {
             )}
           </div>
 
-          <div className="text-error text-center min-h-[24px]">
-            {errorMessage && <p>{errorMessage}</p>}
+          <div className="min-h-[24px]">
+            <p className="text-error">{errorMessage}</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 w-full">
+          <div className="flex flex-col md:flex-row justify-between items-center w-full gap-8">
+            <SendSwapCard
+              updateSendAsset={updateSendAsset}
+              updateSendAmount={updateSendAmount}
+            />
+
+            <div className="flex flex-col items-center justify-center gap-4">
+              <button
+                className="relative bg-black py-3 px-6 rounded-lg font-semibold border border-green-700 hover:bg-green-600 transition"
+                type="button"
+                onClick={performSwap}
+                disabled={isLoading}
+              >
+                {isLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader backgroundClass="inherit" />
+                  </div>
+                )}
+                <span className={`${isLoading ? 'opacity-0' : ''}`}>
+                  Initiate Swap
+                </span>
+              </button>
+            </div>
+
             <ReceiveSwapCard
               updateReceiveAsset={updateReceiveAsset}
               updateReceiveAmount={updateReceiveAmount}
             />
-
-            <div className="flex flex-col gap-4">
-              {isWalletConnected && <WalletInfoContainer updateSendAsset={updateSendAsset} />}
-
-              <SendSwapCard
-                updateSendAsset={updateSendAsset}
-                updateSendAmount={updateSendAmount}
-                disabled={!isWalletConnected}
-              />
-
-              <button
-                className="relative bg-black py-3 px-6 rounded-lg font-semibold border border-green-700 hover:bg-green-600 transition text-white"
-                type="button"
-                onClick={performSwap}
-                disabled={!isWalletConnected || isLoading}
-              >
-                {isLoading ? (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Loader backgroundClass="inherit" />
-                  </div>
-                ) : (
-                  'Initiate Swap'
-                )}
-              </button>
-            </div>
           </div>
         </div>
       </div>
