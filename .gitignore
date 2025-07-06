@@ -129,3 +129,8 @@ dist
 .pnp.*
 
 .DS_Store
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
