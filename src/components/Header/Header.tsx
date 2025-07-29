@@ -4,7 +4,6 @@ import { Link, useLocation } from 'react-router-dom';
 
 import { Logo } from '@/assets/icons/Logo';
 import { MobileMenu, SocialLinks } from '@/components';
-import { ROUTES } from '@/config/routes';
 import { MAIN_LAYOUT_LINKS } from '@/constants';
 import { BurgerButton } from '@/ui-kit';
 
@@ -22,7 +21,7 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     const handleBackgroundOnScroll = () => {
-      const opacity = pathname === ROUTES.HOME ? window.scrollY / 200 : 1;
+      const opacity = window.scrollY / 200;
 
       if (headerRef?.current) {
         headerRef.current.style!.backgroundColor = `rgba(10, 9, 13, ${opacity})`;

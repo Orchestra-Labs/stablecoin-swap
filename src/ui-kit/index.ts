@@ -2,6 +2,7 @@ export * from './Accordion';
 export * from './Badge';
 export * from './BurgerButton';
 export * from './Button';
+export * from './Dialog';
 export * from './Input';
 export * from './Progress';
 export * from './Select';

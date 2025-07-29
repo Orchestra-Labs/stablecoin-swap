@@ -17,7 +17,7 @@ type AssetRegistry = {
   [key: string]: Asset;
 };
 
-export const localAssetRegistry: AssetRegistry = {
+export const STABLECOINS_ASSETS_REGISTRY: AssetRegistry = {
   uusd: {
     denom: 'uusd',
     amount: '10',
@@ -26,7 +26,7 @@ export const localAssetRegistry: AssetRegistry = {
     symbol: 'HUSD',
     exponent: 6,
   },
-  uhkd: {
+  ukhd: {
     denom: 'uhkd',
     amount: '1.282',
     isIbc: false,
@@ -34,6 +34,18 @@ export const localAssetRegistry: AssetRegistry = {
     symbol: 'HHKD',
     exponent: 6,
   },
+  uvnd: {
+    denom: 'uvnd',
+    amount: '0.000399',
+    isIbc: false,
+    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphonytestnet/images/hvnd.png',
+    symbol: 'HVND',
+    exponent: 6,
+  },
+};
+
+export const localAssetRegistry: AssetRegistry = {
+  ...STABLECOINS_ASSETS_REGISTRY,
   note: {
     denom: 'note',
     amount: '1',
