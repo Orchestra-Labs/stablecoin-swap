@@ -1,27 +1,38 @@
 import { Discord, GitHub, Telegram, XIcon } from '@/assets/icons';
 import { LinkTree } from '@/assets/icons/LinkTree';
+import { ROUTES } from '@/config/routes';
 
 export const MAIN_LAYOUT_LINKS = [
   {
-    id: '1',
-    label: 'Whitepaper',
-    target: '_blank',
-    href: 'https://orchestralabs.org/whitepaper',
+    id: 'swap',
+    label: 'Swap',
+    href: ROUTES.HOME,
   },
   {
-    id: '2',
+    id: 'stablestaking',
+    label: 'Stablestaking',
+    href: ROUTES.STABLESTAKING,
+  },
+  // {
+  //   id: 'whitepaper',
+  //   label: 'Whitepaper',
+  //   target: '_blank',
+  //   href: 'https://orchestralabs.org/whitepaper',
+  // },
+  {
+    id: 'documentation',
     label: 'Documentation',
     target: '_blank',
     href: 'https://orchestralabs.org/documentation',
   },
   {
-    id: '3',
+    id: 'explorer',
     label: 'Explorer',
     target: '_blank',
     href: 'https://testnet.ping.pub/symphony',
   },
   {
-    id: '4',
+    id: 'blogs',
     label: 'Blogs',
     target: '_blank',
     rel: 'noopener noreferrer',
