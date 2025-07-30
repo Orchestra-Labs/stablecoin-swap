@@ -2,11 +2,11 @@ import { useChain } from '@cosmos-kit/react';
 import { Wallet } from 'lucide-react';
 import { useEffect } from 'react';
 
-import { Button } from '@/components/Button/button';
+import { Button } from '@/components';
 import { defaultChainName } from '@/constants';
-import { SwapSection } from '@/sections';
+import { StablestakingSection } from '@/sections';
 
-export const Home = () => {
+export const Stablestaking = () => {
   const { isWalletConnected, connect } = useChain(defaultChainName);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export const Home = () => {
   return (
     <div>
       {isWalletConnected ? (
-        <SwapSection />
+        <StablestakingSection />
       ) : (
         <div className="h-screen justify-center flex items-center">
           <Button
