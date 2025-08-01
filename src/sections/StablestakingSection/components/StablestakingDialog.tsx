@@ -3,7 +3,11 @@ import { useMemo, useState } from 'react';
 
 import { defaultChainName, STABLECOINS_ASSETS_REGISTRY } from '@/constants';
 import { useToast, useWalletAssets } from '@/hooks';
-import { useGetParams } from '@/sections';
+import {
+  useGetParams,
+  useGetUserStakeByDenom,
+  useGetUserUnboundingByDenom,
+} from '@/sections';
 import {
   Button,
   Dialog,
@@ -13,7 +17,11 @@ import {
 } from '@/ui-kit';
 
 import { useStablecoinStaking } from '../hooks/useStablecoinStaking';
-import { formatDuration } from '../utils/common';
+import {
+  convertToGreaterUnit,
+  formatBalanceDisplay,
+  formatDuration,
+} from '../utils/common';
 
 type ActionType = 'stake' | 'unstake';
 
@@ -22,7 +30,6 @@ interface StablestakingDialogProps {
   onOpenChange: (open: boolean) => void;
   action: ActionType;
   denom: string;
-  stakedAmount: string;
 }
 
 const DEFAULT_AMOUNT = 0;
@@ -32,11 +39,12 @@ export const StablestakingDialog = ({
   onOpenChange,
   action,
   denom,
-  stakedAmount,
 }: StablestakingDialogProps) => {
   const { address } = useChain(defaultChainName);
   const { toast } = useToast();
 
+  const { data } = useGetUserUnboundingByDenom(denom);
+  console.log('data', data);
   const [amount, setAmount] = useState(DEFAULT_AMOUNT);
 
   const selectedAsset = useMemo(() => {
@@ -44,6 +52,7 @@ export const StablestakingDialog = ({
   }, [denom]);
 
   const { data: stakingParams } = useGetParams();
+  const { data: userStake } = useGetUserStakeByDenom(denom);
   const walletAssets = useWalletAssets();
 
   const { handleStake, handleUnstake, isLoading } = useStablecoinStaking(denom);
@@ -121,6 +130,21 @@ export const StablestakingDialog = ({
     );
   }, [denom, walletAssets]);
 
+  const totalStakedAmount = useMemo(() => {
+    if (!selectedAsset) return '';
+
+    if (!userStake?.stakes?.shares) {
+      return `0 ${selectedAsset.symbol}`;
+    }
+    return formatBalanceDisplay(
+      convertToGreaterUnit(
+        parseFloat(userStake?.stakes?.shares ?? '0'),
+        6,
+      ).toFixed(6),
+      selectedAsset.symbol!,
+    );
+  }, [selectedAsset, userStake?.stakes?.shares]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -130,7 +154,7 @@ export const StablestakingDialog = ({
         <div className="flex flex-col items-center">
           <p className="text-base text-neutral-1 my-1">Staked Balance</p>
           <h2 className="text-h3 text-blue font-bold line-clamp-1">
-            {stakedAmount} {STABLECOINS_ASSETS_REGISTRY[denom]?.symbol}
+            {totalStakedAmount}
           </h2>
           <span className="mt-1 text-grey-dark text-base">
             Unstaking period{' '}
