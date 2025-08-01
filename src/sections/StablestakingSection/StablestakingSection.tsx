@@ -6,18 +6,14 @@ import { useToast } from '@/hooks';
 import { truncateString } from '@/sections';
 import {
   StablecoinList,
+  StablecoinsInfo,
   StakersPerPoolPieChart,
 } from '@/sections/StablestakingSection/components';
 import { TopStakers } from '@/sections/StablestakingSection/components/TopStakers';
 import { formatDuration } from '@/sections/StablestakingSection/utils/common';
 import { Button } from '@/ui-kit';
 
-import {
-  useGetParams,
-  useGetRewardInfo,
-  useGetStablePools,
-  useGetTotalStakers,
-} from './hooks';
+import { useGetParams, useGetRewardInfo, useGetTotalStakers } from './hooks';
 
 export const StablestakingSection = () => {
   const { username, address, disconnect } = useChain(defaultChainName);
@@ -25,11 +21,10 @@ export const StablestakingSection = () => {
   const { toast } = useToast();
 
   const { data: stakingParams } = useGetParams();
-  const { data: stablePools } = useGetStablePools();
   const { data: rewardInfo } = useGetRewardInfo();
   const { data: totalStakers } = useGetTotalStakers();
 
-  console.log('Test endpoints', stablePools, rewardInfo);
+  console.log('Test endpoints', rewardInfo);
 
   const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text);
@@ -116,6 +111,9 @@ export const StablestakingSection = () => {
                 <h3 className="text-h6">Stakers By Pool</h3>
                 <div className="border-t border-neutral-2 my-3" />
                 <StakersPerPoolPieChart />
+              </div>
+              <div className="mt-4 bg-background-dialog-bg backdrop-blur-lg p-3 rounded-md w-full">
+                <StablecoinsInfo />
               </div>
             </div>
           </div>
