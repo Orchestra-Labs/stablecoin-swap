@@ -7,3 +7,7 @@ export interface StablePool {
 export type StablePoolsResponse = {
   pools: StablePool[];
 };
+
+export type StablePoolResponse = {
+  pool: StablePool;
+};
