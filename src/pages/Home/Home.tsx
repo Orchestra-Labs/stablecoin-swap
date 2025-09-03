@@ -2,7 +2,7 @@ import { useChain } from '@cosmos-kit/react';
 import { Wallet } from 'lucide-react';
 import { useEffect } from 'react';
 
-import { Button } from '@/components/Button/button';
+import { Button } from '@/components';
 import { defaultChainName } from '@/constants';
 import { SwapSection } from '@/sections';
 
