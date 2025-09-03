@@ -7,6 +7,10 @@ export const IBCPrefix = 'ibc/';
 export const lesserExponentDefault = 0;
 export const greaterExponentDefault = 6;
 export const chainEndpoint = {
+  symphony: {
+    rpc: [' https://symphony-rpc.cogwheel.zone'],
+    rest: ['https://rpc-main-symphony.vinjan.xyz'],
+  },
   symphonytestnet: {
     rpc: [' https://symphony-rpc.kleomedes.network'],
     rest: ['https://symphony-api.kleomedes.network'],
@@ -22,7 +26,7 @@ export const STABLECOINS_ASSETS_REGISTRY: AssetRegistry = {
     denom: 'uusd',
     amount: '10',
     isIbc: false,
-    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphonytestnet/images/husd.png',
+    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphony/images/husd.png',
     symbol: 'HUSD',
     exponent: 6,
   },
@@ -30,7 +34,7 @@ export const STABLECOINS_ASSETS_REGISTRY: AssetRegistry = {
     denom: 'uhkd',
     amount: '1.282',
     isIbc: false,
-    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphonytestnet/images/hhkd.png',
+    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphony/images/hhkd.png',
     symbol: 'HHKD',
     exponent: 6,
   },
@@ -50,7 +54,7 @@ export const localAssetRegistry: AssetRegistry = {
     denom: 'note',
     amount: '1',
     isIbc: false,
-    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphonytestnet/images/mld.png',
+    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphony/images/mld.png',
     symbol: 'MLD',
     exponent: 6,
   },
