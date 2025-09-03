@@ -1,7 +1,7 @@
 import { Asset } from '@/sections';
 
 export const rpcUrl = 'https://symphony-api.kleomedes.network';
-export const defaultChainName = 'symphonytestnet';
+export const defaultChainName = 'symphony';
 export const walletPrefix = 'symphony1';
 export const IBCPrefix = 'ibc/';
 export const lesserExponentDefault = 0;

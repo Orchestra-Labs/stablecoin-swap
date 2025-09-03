@@ -6,7 +6,7 @@ import { wallets as ariaWallets } from '@cosmos-kit/aria-extension';
 import { ChainProvider } from '@cosmos-kit/react';
 import { getSigningCosmosClientOptions } from '@orchestra-labs/symphonyjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { assets, chains } from 'chain-registry/testnet';
+import { assets, chains } from 'chain-registry';
 import { SignerOptions } from 'cosmos-kit';
 import { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
