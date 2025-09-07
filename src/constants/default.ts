@@ -22,11 +22,19 @@ type AssetRegistry = {
 };
 
 export const STABLECOINS_ASSETS_REGISTRY: AssetRegistry = {
+  mld: {
+    denom: 'note',
+    amount: '1',
+    isIbc: false,
+    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/symphony/imaged/mld.png',
+    symbol: 'MLD',
+    exponent: 6,
+  },
   uusd: {
     denom: 'uusd',
     amount: '10',
     isIbc: false,
-    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphony/images/husd.png',
+    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/symphony/images/husd.png',
     symbol: 'HUSD',
     exponent: 6,
   },
@@ -34,7 +42,7 @@ export const STABLECOINS_ASSETS_REGISTRY: AssetRegistry = {
     denom: 'uhkd',
     amount: '1.282',
     isIbc: false,
-    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphony/images/hhkd.png',
+    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/symphony/images/hhkd.png',
     symbol: 'HHKD',
     exponent: 6,
   },
@@ -42,7 +50,7 @@ export const STABLECOINS_ASSETS_REGISTRY: AssetRegistry = {
     denom: 'uvnd',
     amount: '0.000399',
     isIbc: false,
-    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphonytestnet/images/hvnd.png',
+    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/symphony/images/hvnd.png',
     symbol: 'HVND',
     exponent: 6,
   },
