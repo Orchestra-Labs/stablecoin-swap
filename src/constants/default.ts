@@ -6,16 +6,6 @@ export const walletPrefix = 'symphony1';
 export const IBCPrefix = 'ibc/';
 export const lesserExponentDefault = 0;
 export const greaterExponentDefault = 6;
-export const chainEndpoint = {
-  symphony: {
-    rpc: [' https://symphony-rpc.cogwheel.zone'],
-    rest: ['https://rpc-main-symphony.vinjan.xyz'],
-  },
-  symphonytestnet: {
-    rpc: [' https://symphony-rpc.kleomedes.network'],
-    rest: ['https://symphony-api.kleomedes.network'],
-  },
-};
 
 type AssetRegistry = {
   [key: string]: Asset;
