@@ -29,7 +29,7 @@ export const MAIN_LAYOUT_LINKS = [
     id: 'explorer',
     label: 'Explorer',
     target: '_blank',
-    href: 'https://testnet.ping.pub/symphony',
+    href: 'https://ping.pub/symphony',
   },
   {
     id: 'blogs',

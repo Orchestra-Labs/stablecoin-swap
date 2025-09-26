@@ -52,7 +52,7 @@ export const localAssetRegistry: AssetRegistry = {
     denom: 'note',
     amount: '1',
     isIbc: false,
-    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/symphony/images/mld.png',
+    logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/symphony/images/mld.png',
     symbol: 'MLD',
     exponent: 6,
   },
