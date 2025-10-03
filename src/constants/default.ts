@@ -11,6 +11,7 @@ type AssetRegistry = {
   [key: string]: Asset;
 };
 
+// TODO: pull from remote instead
 export const STABLECOINS_ASSETS_REGISTRY: AssetRegistry = {
   mld: {
     denom: 'note',
