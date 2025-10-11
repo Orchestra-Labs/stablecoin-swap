@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 export default defineConfig({
   define: {
@@ -12,7 +13,17 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  plugins: [react(), viteTsconfigPaths()],
+  plugins: [
+    react(),
+    viteTsconfigPaths(),
+    nodePolyfills({
+      include: ['buffer', 'process', 'util'],
+      globals: {
+        Buffer: true,
+        process: true,
+      },
+    }),
+  ],
   server: {
     open: true,
     host: true,

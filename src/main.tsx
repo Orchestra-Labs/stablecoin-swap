@@ -1,5 +1,5 @@
+import './polyfill'; // NOTE: register polyfill before any other imports
 import './main.css';
-import "./polyfill"; // ! register polyfill before any other imports
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';

@@ -99,7 +99,8 @@
     "prettier": "~3.2.5",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "typescript": "~5.4.2",
-    "vite": "~5.1.6"
+    "vite": "~5.1.6",
+    "vite-plugin-node-polyfills": "^0.24.0"
   },
   "resolutions": {
     "@cosmjs/proto-signing": "0.33.1",
