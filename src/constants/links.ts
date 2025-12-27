@@ -4,9 +4,9 @@ import { ROUTES } from '@/config/routes';
 
 export const MAIN_LAYOUT_LINKS = [
   {
-    id: 'swap',
-    label: 'Swap',
-    href: ROUTES.HOME,
+    id: 'airdrop-tracker',
+    label: 'airdrop-tracker',
+    href: 'https://airdrop-tracker.orchestralabs.org',
   },
   {
     id: 'stablestaking',
@@ -22,7 +22,6 @@ export const MAIN_LAYOUT_LINKS = [
   {
     id: 'documentation',
     label: 'Documentation',
-    target: '_blank',
     href: 'https://orchestralabs.org/documentation',
   },
   {
