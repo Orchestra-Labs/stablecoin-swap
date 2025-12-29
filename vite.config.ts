@@ -25,7 +25,7 @@ export default defineConfig({
       'process',
       'readable-stream',
       'events',
-      '@cosmos-kit/aria-extension',
+      '@cosmos-kit/aria',
       '@cosmos-kit/keplr',
       '@cosmos-kit/react',
     ],
