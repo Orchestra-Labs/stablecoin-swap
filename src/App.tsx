@@ -48,7 +48,7 @@ export default function App() {
       signerOptions={signerOptions}
       walletConnectOptions={{
         signClient: {
-          projectId: import.meta.env.VITE_PUBLIC_WALLETCONNECT_PROJECT_ID,
+          projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID,
         },
       }}
       throwErrors={true}
