@@ -44,7 +44,7 @@ export default function App() {
     <ChainProvider
       chains={supportedChains} // supported chains
       assetLists={assets} // supported asset lists
-      wallets={[...keplrWallets, ...leapWallets, ...ariaWallets]} // supported wallets,
+      wallets={[...ariaWallets, ...keplrWallets, ...leapWallets]} // supported wallets,
       signerOptions={signerOptions}
       walletConnectOptions={{
         signClient: {
