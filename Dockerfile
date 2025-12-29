@@ -8,5 +8,6 @@ EXPOSE 4173
 
 RUN yarn install
 RUN yarn build
+RUN yarn global add serve
 
-CMD ["yarn", "start"]
+CMD ["serve", "-s", "dist", "-l", "4173"]
