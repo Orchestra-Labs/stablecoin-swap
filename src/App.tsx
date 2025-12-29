@@ -13,8 +13,12 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { Loader, ScrollToTop } from '@/components';
 import { defaultChainName } from '@/constants';
+import { setupWalletErrorFilter } from '@/helpers';
 
 import { AppRouter } from './app/Router';
+
+// Setup wallet error filtering (silences "wallet not installed" errors, shows toasts for user actions)
+setupWalletErrorFilter();
 
 const queryClient = new QueryClient({
   defaultOptions: {
